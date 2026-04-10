@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: ice-hockey-attendance
+    env: python
+    plan: free
+    buildCommand: ""
+    startCommand: python server.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: SECURE_COOKIES
+        value: "1"
+    disk:
+      name: attendance-data
+      mountPath: /var/data
+      sizeGB: 1

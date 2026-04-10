@@ -1,0 +1,30 @@
+{
+  "team_name": "アイスホッケー練習出欠",
+  "admin_pin_hash": "pbkdf2_sha256$240000$Lp/ZwDqEzb88T2vuDItY/g==$+0eIs38bb088VsBbt3z9ADVC4UqqLdeJOyfhaqLiJRE=",
+  "members": [
+    {
+      "name": "大池音々",
+      "pin_hash": "pbkdf2_sha256$240000$5NY1y/N5DTHJLRPixyxDgw==$tFfsOrSoJ2ul4G+vqjTm/+ovsiHZE1GHGdhzrt4l0w0="
+    },
+    {
+      "name": "森田健友",
+      "pin_hash": "pbkdf2_sha256$240000$GnC50Z9FYqxOg+E9Wk6ifg==$vyXweCfPU3ftAbimWg46P3qg6k4LycvtNCTAoWT1BEc="
+    },
+    {
+      "name": "美馬碧仁",
+      "pin_hash": "pbkdf2_sha256$240000$6eKpdMbBswis9Ahu93om0Q==$SugWtC8aPTv/e0POTRiTiVI29MxtcyuYTJiyuhiN384="
+    },
+    {
+      "name": "荻原瑛史",
+      "pin_hash": "pbkdf2_sha256$240000$b01P9/NxfY01GPlutkiaVg==$3Ka11kf6BC6p/MwZNsp6+GcEAzcLrn4w0UuXxfH5u9k="
+    },
+    {
+      "name": "尾山旭",
+      "pin_hash": "pbkdf2_sha256$240000$CqS8Ju/C/z9BKNi5mtsntA==$SpOL0JiDTs8BqPgzVjBZKpryazpAN1ruS3NZFbowCYA="
+    },
+    {
+      "name": "笠原現",
+      "pin_hash": "pbkdf2_sha256$240000$snCBxO1k5B/NxAx6+IuCrg==$VOEHmGeU3kjQzO8TWbFwxNGFp7XejcYVrxrxVQNke0A="
+    }
+  ]
+}

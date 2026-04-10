@@ -1,0 +1,71 @@
+:root {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --ink: #0f172a;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --soft: #f1f5f9;
+  --primary: #0f172a;
+  --primary-2: #1e293b;
+  --ok-bg: #dcfce7;
+  --ok-ink: #166534;
+  --ng-bg: #fee2e2;
+  --ng-ink: #991b1b;
+  --pending-bg: #e2e8f0;
+  --pending-ink: #475569;
+  --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  --radius: 24px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans JP", sans-serif; background: var(--bg); color: var(--ink); }
+body { min-height: 100vh; }
+button, input, select { font: inherit; }
+button { border: 0; cursor: pointer; }
+.shell { max-width: 430px; margin: 0 auto; min-height: 100vh; padding: 18px 16px 32px; }
+.topbar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom: 16px; }
+.brand { font-size: 1.55rem; font-weight: 800; letter-spacing: -0.02em; }
+.sub { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+.iconbtn, .ghost { background: transparent; color: var(--muted); padding: 10px 12px; border-radius: 999px; }
+.grid { display: grid; gap: 12px; }
+.card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; }
+.card h2, .card h3, .card p { margin: 0; }
+.card h2 { font-size: 1rem; font-weight: 800; }
+.row { display:flex; align-items:center; justify-content:space-between; gap: 12px; }
+.stack { display:grid; gap: 10px; }
+.menu-button { width:100%; background: var(--soft); border-radius: 20px; padding: 16px; display:flex; align-items:center; justify-content:space-between; color: var(--ink); }
+.menu-label { display:grid; gap:4px; text-align:left; }
+.menu-title { font-weight: 700; }
+.menu-note { font-size: .8rem; color: var(--muted); }
+.field { display:grid; gap:6px; }
+.label { font-size: .8rem; color: var(--muted); font-weight:600; }
+input, select { width:100%; border:1px solid var(--line); background:#fff; padding: 14px 14px; border-radius: 16px; outline:none; }
+input:focus, select:focus { border-color: #94a3b8; box-shadow: 0 0 0 4px rgba(148,163,184,.15); }
+.primary { width:100%; padding: 14px 16px; border-radius: 18px; background: var(--primary); color:#fff; font-weight: 700; }
+.secondary { background: var(--soft); color: var(--ink); }
+.smallbtn { padding: 10px 12px; border-radius: 14px; }
+.pillrow { display:flex; gap:8px; flex-wrap:wrap; }
+.pill { padding: 10px 14px; border-radius: 999px; font-weight:700; }
+.pill.pending { background: var(--pending-bg); color: var(--pending-ink); }
+.pill.ok { background: var(--ok-bg); color: var(--ok-ink); }
+.pill.ng { background: var(--ng-bg); color: var(--ng-ink); }
+.practice-card { display:grid; gap: 14px; }
+.practice-head { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.practice-date { font-weight:800; }
+.time-badge { background: var(--soft); color: var(--muted); border-radius: 999px; padding: 8px 12px; font-size: .8rem; font-weight:700; white-space: nowrap; }
+.summary { font-size:.82rem; color: var(--muted); }
+.memberrow { display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 12px 0; border-top:1px solid var(--line); }
+.memberrow:first-child { border-top:0; padding-top:0; }
+.membername { font-weight:700; }
+.switches { display:flex; gap:8px; }
+.choice { min-width: 74px; padding: 10px 12px; border-radius: 999px; background: var(--soft); color: var(--muted); font-weight:700; }
+.choice.active-ok { background: var(--ok-bg); color: var(--ok-ink); }
+.choice.active-ng { background: var(--ng-bg); color: var(--ng-ink); }
+.choice.active-pending { background: var(--pending-bg); color: var(--pending-ink); }
+.danger { color: #b91c1c; background: #fef2f2; }
+.notice { background: #ecfeff; color: #155e75; padding: 12px 14px; border-radius: 16px; font-size: .84rem; }
+.error { color: #b91c1c; font-size:.85rem; }
+.center { text-align:center; }
+.meta3 { display:flex; gap:8px; flex-wrap:wrap; }
+.meta3 span { background: var(--soft); color: var(--muted); border-radius: 999px; padding: 6px 10px; font-size:.76rem; font-weight:700; }
+.footer-note { margin-top: 14px; font-size: .76rem; color: var(--muted); text-align:center; }
+@media (min-width: 520px) { .shell { padding-top: 28px; } }
