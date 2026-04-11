@@ -6,7 +6,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = "ice_hockey_attendance_secret_2026"
-DATABASE = "attendance.db"
+DATABASE = "attendance_v2.db"
 
 ADMIN_PIN_HASH = hashlib.sha256("260410".encode("utf-8")).hexdigest()
 
