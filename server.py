@@ -3,8 +3,8 @@ import os
 import hashlib
 from datetime import datetime
 
-import psycopg2
-from psycopg2.extras import RealDictCursor
+import psycopg
+from psycopg.rows import dict_row
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "ice_hockey_attendance_secret_2026")
@@ -12,13 +12,13 @@ app.secret_key = os.environ.get("SECRET_KEY", "ice_hockey_attendance_secret_2026
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 if not DATABASE_URL:
-    raise RuntimeError("DATABASE_URL が設定されていません。Render の環境変数を確認してください。")
+    raise RuntimeError("DATABASE_URL が設定されていません")
 
-ADMIN_PIN_HASH = hashlib.sha256("260410".encode("utf-8")).hexdigest()
+ADMIN_PIN_HASH = hashlib.sha256("260410".encode()).hexdigest()
 
 
-def hash_pin(pin: str) -> str:
-    return hashlib.sha256(pin.encode("utf-8")).hexdigest()
+def hash_pin(pin):
+    return hashlib.sha256(pin.encode()).hexdigest()
 
 
 DEFAULT_MEMBERS = [
@@ -31,113 +31,110 @@ DEFAULT_MEMBERS = [
 ]
 
 
+# ---------------- DB ----------------
+
 def get_db():
     if "db" not in g:
-        g.db = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+        g.db = psycopg.connect(DATABASE_URL, row_factory=dict_row)
     return g.db
 
 
 @app.teardown_appcontext
 def close_db(exception):
     db = g.pop("db", None)
-    if db is not None:
+    if db:
         db.close()
 
 
 def init_db():
     db = get_db()
-    cur = db.cursor()
+    with db.cursor() as cur:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS members (
+                id SERIAL PRIMARY KEY,
+                name TEXT UNIQUE,
+                pin_hash TEXT,
+                created_at TEXT
+            )
+        """)
 
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS members (
-            id SERIAL PRIMARY KEY,
-            name TEXT NOT NULL UNIQUE,
-            pin_hash TEXT NOT NULL,
-            created_at TEXT
-        )
-    """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS practices (
+                id SERIAL PRIMARY KEY,
+                practice_date TEXT,
+                practice_time TEXT,
+                created_at TEXT
+            )
+        """)
 
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS practices (
-            id SERIAL PRIMARY KEY,
-            practice_date TEXT NOT NULL,
-            practice_time TEXT NOT NULL,
-            created_at TEXT
-        )
-    """)
-
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS attendance (
-            id SERIAL PRIMARY KEY,
-            practice_id INTEGER NOT NULL REFERENCES practices(id) ON DELETE CASCADE,
-            member_id INTEGER NOT NULL REFERENCES members(id) ON DELETE CASCADE,
-            status TEXT,
-            UNIQUE(practice_id, member_id)
-        )
-    """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS attendance (
+                id SERIAL PRIMARY KEY,
+                practice_id INTEGER,
+                member_id INTEGER,
+                status TEXT,
+                UNIQUE(practice_id, member_id)
+            )
+        """)
 
     db.commit()
-    cur.close()
-
-    seed_default_members()
-    migrate_existing_data()
+    seed_members()
+    migrate()
 
 
-def seed_default_members():
+def seed_members():
     db = get_db()
-    cur = db.cursor()
+    with db.cursor() as cur:
+        cur.execute("SELECT COUNT(*) FROM members")
+        count = cur.fetchone()["count"]
 
-    cur.execute("SELECT COUNT(*) AS cnt FROM members")
-    count = cur.fetchone()["cnt"]
-
-    if count == 0:
-        now = datetime.now().isoformat()
-        for member in DEFAULT_MEMBERS:
-            cur.execute(
-                "INSERT INTO members (name, pin_hash, created_at) VALUES (%s, %s, %s)",
-                (member["name"], member["pin_hash"], now)
-            )
-        db.commit()
-
-    cur.close()
-
-
-def migrate_existing_data():
-    db = get_db()
-    cur = db.cursor()
-
-    cur.execute("SELECT id FROM members")
-    members = cur.fetchall()
-
-    cur.execute("SELECT id FROM practices")
-    practices = cur.fetchall()
-
-    for practice in practices:
-        for member in members:
-            cur.execute(
-                "SELECT 1 FROM attendance WHERE practice_id = %s AND member_id = %s",
-                (practice["id"], member["id"])
-            )
-            exists = cur.fetchone()
-
-            if not exists:
+        if count == 0:
+            now = datetime.now().isoformat()
+            for m in DEFAULT_MEMBERS:
                 cur.execute(
-                    "INSERT INTO attendance (practice_id, member_id, status) VALUES (%s, %s, %s)",
-                    (practice["id"], member["id"], None)
+                    "INSERT INTO members (name, pin_hash, created_at) VALUES (%s,%s,%s)",
+                    (m["name"], m["pin_hash"], now)
                 )
-
     db.commit()
-    cur.close()
 
 
-def format_date(date_str):
+def migrate():
+    db = get_db()
+    with db.cursor() as cur:
+        cur.execute("SELECT id FROM members")
+        members = cur.fetchall()
+
+        cur.execute("SELECT id FROM practices")
+        practices = cur.fetchall()
+
+        for p in practices:
+            for m in members:
+                cur.execute(
+                    "SELECT 1 FROM attendance WHERE practice_id=%s AND member_id=%s",
+                    (p["id"], m["id"])
+                )
+                if not cur.fetchone():
+                    cur.execute(
+                        "INSERT INTO attendance (practice_id, member_id, status) VALUES (%s,%s,%s)",
+                        (p["id"], m["id"], None)
+                    )
+    db.commit()
+
+
+# ---------------- Utility ----------------
+
+def format_date(d):
     try:
-        dt = datetime.strptime(date_str, "%Y-%m-%d")
-        weeks = ["月", "火", "水", "木", "金", "土", "日"]
-        week = weeks[dt.weekday()]
-        return f"{dt.month}/{dt.day}({week})"
-    except Exception:
-        return date_str
+        dt = datetime.strptime(d, "%Y-%m-%d")
+        w = ["月","火","水","木","金","土","日"]
+        return f"{dt.month}/{dt.day}({w[dt.weekday()]})"
+    except:
+        return d
+
+
+@app.context_processor
+def util():
+    return {"format_date": format_date}
 
 
 def is_admin():
@@ -145,298 +142,148 @@ def is_admin():
 
 
 def is_member():
-    return session.get("role") == "member" and session.get("member_id") is not None
+    return session.get("role") == "member"
 
 
-@app.context_processor
-def inject_helpers():
-    return {"format_date": format_date}
-
+# ---------------- Routes ----------------
 
 @app.route("/")
 def home():
     db = get_db()
-    cur = db.cursor()
+    with db.cursor() as cur:
+        cur.execute("SELECT id,name FROM members ORDER BY id")
+        members = cur.fetchall()
 
-    cur.execute("SELECT id, name FROM members ORDER BY id")
-    members = cur.fetchall()
-
-    cur.close()
     return render_template("index.html", page="home", members=members)
 
 
 @app.route("/login/admin", methods=["POST"])
-def login_admin():
-    pin = request.form.get("pin", "").strip()
+def admin_login():
+    pin = request.form.get("pin")
 
     if hash_pin(pin) == ADMIN_PIN_HASH:
         session.clear()
         session["role"] = "admin"
-        return redirect(url_for("admin_page"))
+        return redirect("/admin")
 
-    return redirect(url_for("home"))
+    return redirect("/")
 
 
 @app.route("/login/member", methods=["POST"])
-def login_member():
-    member_id = request.form.get("member_id", "").strip()
-    pin = request.form.get("pin", "").strip()
+def member_login():
+    mid = request.form.get("member_id")
+    pin = request.form.get("pin")
 
     db = get_db()
-    cur = db.cursor()
+    with db.cursor() as cur:
+        cur.execute("SELECT * FROM members WHERE id=%s", (mid,))
+        m = cur.fetchone()
 
-    cur.execute(
-        "SELECT id, name, pin_hash FROM members WHERE id = %s",
-        (member_id,)
-    )
-    member = cur.fetchone()
-    cur.close()
-
-    if member and member["pin_hash"] == hash_pin(pin):
+    if m and m["pin_hash"] == hash_pin(pin):
         session.clear()
         session["role"] = "member"
-        session["member_id"] = member["id"]
-        session["member_name"] = member["name"]
-        return redirect(url_for("member_page"))
+        session["member_id"] = m["id"]
+        session["member_name"] = m["name"]
+        return redirect("/member")
 
-    return redirect(url_for("home"))
+    return redirect("/")
 
 
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect(url_for("home"))
+    return redirect("/")
 
+
+# ---------------- Admin ----------------
 
 @app.route("/admin")
-def admin_page():
+def admin():
     if not is_admin():
-        return redirect(url_for("home"))
+        return redirect("/")
 
     db = get_db()
-    cur = db.cursor()
+    with db.cursor() as cur:
+        cur.execute("SELECT * FROM practices ORDER BY practice_date")
+        practices = cur.fetchall()
 
-    cur.execute("""
-        SELECT id, practice_date, practice_time
-        FROM practices
-        ORDER BY practice_date ASC, practice_time ASC
-    """)
-    practices = cur.fetchall()
+        cur.execute("SELECT * FROM members")
+        members = cur.fetchall()
 
-    cur.execute("""
-        SELECT id, name
-        FROM members
-        ORDER BY id ASC
-    """)
-    members = cur.fetchall()
-
-    summary = {}
-    for practice in practices:
-        cur.execute("""
-            SELECT m.name, a.status
-            FROM attendance a
-            JOIN members m ON a.member_id = m.id
-            WHERE a.practice_id = %s
-            ORDER BY m.id ASC
-        """, (practice["id"],))
-        rows = cur.fetchall()
-
-        attend_members = [r["name"] for r in rows if r["status"] == "attend"]
-        absent_members = [r["name"] for r in rows if r["status"] == "absent"]
-        unanswered_members = [r["name"] for r in rows if r["status"] is None]
-
-        summary[practice["id"]] = {
-            "attend": len(attend_members),
-            "absent": len(absent_members),
-            "unanswered": len(unanswered_members),
-            "attend_members": attend_members,
-            "absent_members": absent_members,
-            "unanswered_members": unanswered_members,
-        }
-
-    cur.close()
-
-    return render_template(
-        "index.html",
-        page="admin",
-        practices=practices,
-        members=members,
-        summary=summary,
-    )
+    return render_template("index.html", page="admin", practices=practices, members=members)
 
 
-@app.route("/admin/practice/add", methods=["POST"])
-def add_practice():
+@app.route("/admin/add", methods=["POST"])
+def add():
     if not is_admin():
-        return redirect(url_for("home"))
+        return redirect("/")
 
-    practice_date = request.form.get("practice_date", "").strip()
-    practice_time = request.form.get("practice_time", "").strip()
+    d = request.form.get("date")
+    t = request.form.get("time")
 
-    if practice_date and practice_time:
-        db = get_db()
-        cur = db.cursor()
-
-        now = datetime.now().isoformat()
+    db = get_db()
+    with db.cursor() as cur:
         cur.execute(
-            "INSERT INTO practices (practice_date, practice_time, created_at) VALUES (%s, %s, %s) RETURNING id",
-            (practice_date, practice_time, now)
+            "INSERT INTO practices (practice_date,practice_time,created_at) VALUES (%s,%s,%s) RETURNING id",
+            (d, t, datetime.now().isoformat())
         )
-        practice_id = cur.fetchone()["id"]
+        pid = cur.fetchone()["id"]
 
         cur.execute("SELECT id FROM members")
         members = cur.fetchall()
 
-        for member in members:
+        for m in members:
             cur.execute(
-                "INSERT INTO attendance (practice_id, member_id, status) VALUES (%s, %s, %s)",
-                (practice_id, member["id"], None)
+                "INSERT INTO attendance (practice_id,member_id,status) VALUES (%s,%s,%s)",
+                (pid, m["id"], None)
             )
-
-        db.commit()
-        cur.close()
-
-    return redirect(url_for("admin_page"))
-
-
-@app.route("/admin/practice/edit/<int:practice_id>", methods=["POST"])
-def edit_practice(practice_id):
-    if not is_admin():
-        return redirect(url_for("home"))
-
-    practice_date = request.form.get("practice_date", "").strip()
-    practice_time = request.form.get("practice_time", "").strip()
-
-    if practice_date and practice_time:
-        db = get_db()
-        cur = db.cursor()
-
-        cur.execute("""
-            UPDATE practices
-            SET practice_date = %s, practice_time = %s
-            WHERE id = %s
-        """, (practice_date, practice_time, practice_id))
-
-        db.commit()
-        cur.close()
-
-    return redirect(url_for("admin_page"))
-
-
-@app.route("/admin/practice/delete/<int:practice_id>", methods=["POST"])
-def delete_practice(practice_id):
-    if not is_admin():
-        return redirect(url_for("home"))
-
-    db = get_db()
-    cur = db.cursor()
-
-    cur.execute("DELETE FROM attendance WHERE practice_id = %s", (practice_id,))
-    cur.execute("DELETE FROM practices WHERE id = %s", (practice_id,))
 
     db.commit()
-    cur.close()
-
-    return redirect(url_for("admin_page"))
+    return redirect("/admin")
 
 
-@app.route("/admin/member/add", methods=["POST"])
-def add_member():
-    if not is_admin():
-        return redirect(url_for("home"))
-
-    name = request.form.get("name", "").strip()
-    pin = request.form.get("pin", "").strip()
-
-    if name and pin:
-        db = get_db()
-        cur = db.cursor()
-
-        now = datetime.now().isoformat()
-
-        try:
-            cur.execute(
-                "INSERT INTO members (name, pin_hash, created_at) VALUES (%s, %s, %s) RETURNING id",
-                (name, hash_pin(pin), now)
-            )
-            member_id = cur.fetchone()["id"]
-
-            cur.execute("SELECT id FROM practices")
-            practices = cur.fetchall()
-
-            for practice in practices:
-                cur.execute(
-                    "INSERT INTO attendance (practice_id, member_id, status) VALUES (%s, %s, %s)",
-                    (practice["id"], member_id, None)
-                )
-
-            db.commit()
-
-        except psycopg2.Error:
-            db.rollback()
-
-        finally:
-            cur.close()
-
-    return redirect(url_for("admin_page"))
-
+# ---------------- Member ----------------
 
 @app.route("/member")
-def member_page():
+def member():
     if not is_member():
-        return redirect(url_for("home"))
+        return redirect("/")
 
     db = get_db()
-    cur = db.cursor()
-    member_id = session["member_id"]
+    mid = session["member_id"]
 
-    cur.execute("""
-        SELECT
-            p.id,
-            p.practice_date,
-            p.practice_time,
-            a.status
-        FROM practices p
-        LEFT JOIN attendance a
-            ON p.id = a.practice_id
-        WHERE a.member_id = %s
-        ORDER BY p.practice_date ASC, p.practice_time ASC
-    """, (member_id,))
-    practices = cur.fetchall()
+    with db.cursor() as cur:
+        cur.execute("""
+            SELECT p.id,p.practice_date,p.practice_time,a.status
+            FROM practices p
+            LEFT JOIN attendance a ON p.id=a.practice_id
+            WHERE a.member_id=%s
+            ORDER BY p.practice_date
+        """, (mid,))
+        data = cur.fetchall()
 
-    cur.close()
-
-    return render_template(
-        "index.html",
-        page="member",
-        practices=practices,
-        member_name=session.get("member_name", "")
-    )
+    return render_template("index.html", page="member", practices=data, member_name=session["member_name"])
 
 
-@app.route("/member/attendance/<int:practice_id>", methods=["POST"])
-def update_attendance(practice_id):
+@app.route("/member/update/<int:pid>", methods=["POST"])
+def update(pid):
     if not is_member():
-        return redirect(url_for("home"))
+        return redirect("/")
 
-    status = request.form.get("status", "").strip()
-    if status not in ("attend", "absent"):
-        return redirect(url_for("member_page"))
+    status = request.form.get("status")
 
     db = get_db()
-    cur = db.cursor()
-
-    cur.execute("""
-        UPDATE attendance
-        SET status = %s
-        WHERE practice_id = %s AND member_id = %s
-    """, (status, practice_id, session["member_id"]))
+    with db.cursor() as cur:
+        cur.execute(
+            "UPDATE attendance SET status=%s WHERE practice_id=%s AND member_id=%s",
+            (status, pid, session["member_id"])
+        )
 
     db.commit()
-    cur.close()
+    return redirect("/member")
 
-    return redirect(url_for("member_page"))
 
+# ---------------- Init ----------------
 
 with app.app_context():
     init_db()
