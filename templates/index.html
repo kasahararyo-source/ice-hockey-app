@@ -1,161 +1,45 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>練習出欠アプリ</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f3f4f6; color: #111827; }
-    .wrap { max-width: 480px; margin: 0 auto; padding: 16px; }
-    .header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
-    .logo { height: 36px; width: auto; opacity: 0.92; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15)); }
-    .title { font-size: 22px; font-weight: 700; margin: 0; }
-    .sub { color: #6b7280; font-size: 13px; margin: 4px 0 0 0; }
-    .card { background: #ffffff; border-radius: 18px; padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-    .section-title { font-size: 16px; font-weight: 700; margin: 0 0 12px 0; }
-    .label { display: block; font-size: 12px; color: #6b7280; margin-bottom: 6px; }
-    .input, .select { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 12px; font-size: 14px; margin-bottom: 12px; background: #fff; }
-    .btn { width: 100%; border: none; border-radius: 12px; padding: 12px 14px; font-size: 14px; font-weight: 700; cursor: pointer; background: #111827; color: white; }
-    .btn-danger { background: #ef4444; color: white; }
-    .practice-head { display: flex; justify-content: space-between; align-items: start; gap: 8px; margin-bottom: 10px; }
-    .practice-date { font-size: 16px; font-weight: 700; }
-    .practice-time { font-size: 12px; color: #6b7280; background: #f3f4f6; padding: 6px 10px; border-radius: 999px; white-space: nowrap; }
-    .summary { font-size: 12px; color: #6b7280; margin-bottom: 12px; }
-    .member-row { display: flex; justify-content: space-between; align-items: center; background: #f9fafb; border-radius: 14px; padding: 12px; margin-bottom: 8px; }
-    .member-name { font-size: 14px; font-weight: 600; }
-    .pill-row { display: flex; gap: 8px; }
-    .pill { border: none; padding: 10px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; cursor: pointer; }
-    .pill-attend { background: #111827; color: white; }
-    .pill-absent { background: #e5e7eb; color: #111827; }
-    .status-text { font-size: 12px; color: #6b7280; margin-top: 8px; }
-    .logout { display: inline-block; text-decoration: none; color: #6b7280; font-size: 13px; margin-bottom: 16px; }
-    .muted { color: #6b7280; font-size: 12px; }
-  </style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>出欠管理</title>
 </head>
-<body>
-  <div class="wrap">
-    <div class="header">
-      <img src="{{ url_for('static', filename='logo.png') }}" alt="logo" class="logo">
-      <div>
-        <h1 class="title">OB・OG ビジタ出欠アプリ</h1>
-        <p class="sub">OB・OG向けの練習出欠管理</p>
-      </div>
-    </div>
 
-    {% if page == 'home' %}
-      <div class="card">
-        <div class="section-title">管理者ログイン</div>
-        <form method="post" action="{{ url_for('login_admin') }}">
-          <label class="label">管理者PIN</label>
-          <input class="input" type="password" name="pin" placeholder="管理者PINを入力" required>
-          <button class="btn" type="submit">管理者ページへ</button>
-        </form>
-      </div>
+<body style="font-family:sans-serif; max-width:500px; margin:auto;">
 
-      <div class="card">
-        <div class="section-title">登録者ログイン</div>
-        <form method="post" action="{{ url_for('login_member') }}">
-          <label class="label">名前</label>
-          <select class="select" name="member_id" required>
-            <option value="">選択してください</option>
-            {% for member in members %}
-              <option value="{{ member.id }}">{{ member.name }}</option>
-            {% endfor %}
-          </select>
-          <label class="label">PIN</label>
-          <input class="input" type="password" name="pin" placeholder="PINを入力" required>
-          <button class="btn" type="submit">回答ページへ</button>
-        </form>
-      </div>
-    {% endif %}
+<h2>出欠管理</h2>
 
-    {% if page == 'admin' %}
-      <a class="logout" href="{{ url_for('logout') }}">← ログアウト</a>
+{% if page == 'admin' %}
 
-      <div class="card">
-        <div class="section-title">練習を登録</div>
-        <form method="post" action="{{ url_for('add_practice') }}">
-          <label class="label">練習日</label>
-          <input class="input" type="date" name="practice_date" required>
-          <label class="label">練習時間</label>
-          <input class="input" type="text" name="practice_time" placeholder="例 10:00-12:00" required>
-          <button class="btn" type="submit">登録する</button>
-        </form>
-      </div>
+{% for practice in practices %}
 
-      <div class="card">
-        <div class="section-title">登録者を追加</div>
-        <form method="post" action="{{ url_for('add_member') }}">
-          <label class="label">名前</label>
-          <input class="input" type="text" name="name" placeholder="例 田中太郎" required>
-          <label class="label">PIN</label>
-          <input class="input" type="text" name="pin" placeholder="6桁推奨" required>
-          <button class="btn" type="submit">登録者を追加</button>
-        </form>
-      </div>
+<div style="border:1px solid #ddd; padding:10px; margin-bottom:10px;">
 
-      <div class="card">
-        <div class="section-title">登録者一覧</div>
-        {% for member in members %}
-          <div class="member-row"><div class="member-name">{{ member.name }}</div></div>
-        {% endfor %}
-      </div>
+<b>{{ practice.date }} {{ practice.time }}</b><br>
 
-      <div class="section-title" style="margin-bottom:12px;">練習一覧</div>
-      {% for practice in practices %}
-        <div class="card">
-          <div class="practice-head">
-            <div><div class="practice-date">{{ format_date(practice.practice_date) }}</div></div>
-            <div class="practice-time">{{ practice.practice_time }}</div>
-          </div>
-          <div class="summary">
-            出席 {{ summary[practice.id].attend }} / 欠席 {{ summary[practice.id].absent }} / 未回答 {{ summary[practice.id].unanswered }}
-          </div>
-          <form method="post" action="{{ url_for('edit_practice', practice_id=practice.id) }}">
-            <label class="label">日程を編集</label>
-            <input class="input" type="date" name="practice_date" value="{{ practice.practice_date }}" required>
-            <input class="input" type="text" name="practice_time" value="{{ practice.practice_time }}" required>
-            <button class="btn" type="submit">保存する</button>
-          </form>
-          <form method="post" action="{{ url_for('delete_practice', practice_id=practice.id) }}" style="margin-top:8px;">
-            <button class="btn btn-danger" type="submit">この練習を削除</button>
-          </form>
-        </div>
-      {% endfor %}
-    {% endif %}
+出席 {{ summary[practice.id].attend }}
+欠席 {{ summary[practice.id].absent }}
+未回答 {{ summary[practice.id].unanswered }}
 
-    {% if page == 'member' %}
-      <a class="logout" href="{{ url_for('logout') }}">← ログアウト</a>
-      <div class="card">
-        <div class="section-title">{{ member_name }}</div>
-        <div class="muted">自分の出欠だけ回答できます</div>
-      </div>
+<hr>
 
-      {% for practice in practices %}
-        <div class="card">
-          <div class="practice-head">
-            <div class="practice-date">{{ format_date(practice.practice_date) }}</div>
-            <div class="practice-time">{{ practice.practice_time }}</div>
-          </div>
-          <form method="post" action="{{ url_for('update_attendance', practice_id=practice.id) }}">
-            <div class="pill-row">
-              <button class="pill {% if practice.status == 'attend' %}pill-attend{% else %}pill-absent{% endif %}" type="submit" name="status" value="attend">出席</button>
-              <button class="pill {% if practice.status == 'absent' %}pill-attend{% else %}pill-absent{% endif %}" type="submit" name="status" value="absent">欠席</button>
-            </div>
-          </form>
-          <div class="status-text">
-            {% if practice.status == 'attend' %}
-              現在の回答：出席
-            {% elif practice.status == 'absent' %}
-              現在の回答：欠席
-            {% else %}
-              現在の回答：未回答
-            {% endif %}
-          </div>
-        </div>
-      {% endfor %}
-    {% endif %}
-  </div>
+<div style="color:green;">
+出席：{{ summary[practice.id].attend_members | join('、') or 'なし' }}
+</div>
+
+<div style="color:red;">
+欠席：{{ summary[practice.id].absent_members | join('、') or 'なし' }}
+</div>
+
+<div style="color:gray;">
+未回答：{{ summary[practice.id].unanswered_members | join('、') or 'なし' }}
+</div>
+
+</div>
+
+{% endfor %}
+
+{% endif %}
+
 </body>
 </html>
