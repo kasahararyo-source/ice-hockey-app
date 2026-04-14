@@ -191,7 +191,6 @@
     }
     .people-attend { color: #16a34a; }
     .people-absent { color: #dc2626; }
-    .people-unanswered { color: #6b7280; }
     .people-list {
       font-size: 13px;
       color: #374151;
@@ -216,6 +215,98 @@
       color: #6b7280;
       font-size: 14px;
     }
+
+    .result-section {
+      margin-bottom: 16px;
+    }
+    .result-toggle {
+      background: #ffffff;
+      border-radius: 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    .result-toggle summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .result-toggle summary::-webkit-details-marker {
+      display: none;
+    }
+    .result-toggle summary::after {
+      content: "＋";
+      font-size: 20px;
+      color: #6b7280;
+      line-height: 1;
+    }
+    .result-toggle[open] summary::after {
+      content: "−";
+    }
+    .result-note {
+      padding: 0 16px 12px 16px;
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+    .result-item {
+      border-top: 1px solid #f3f4f6;
+      padding: 14px 16px;
+    }
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .result-main {
+      font-size: 14px;
+      font-weight: 700;
+      color: #111827;
+    }
+    .result-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .mini-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #111827;
+      background: #e5e7eb;
+      padding: 6px 10px;
+      border-radius: 999px;
+    }
+
+    .result-detail {
+      margin-top: 10px;
+    }
+    .result-detail summary {
+      padding: 0;
+      font-size: 13px;
+      font-weight: 700;
+      color: #111827;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      box-shadow: none;
+      border-radius: 0;
+    }
+    .result-detail summary::after {
+      content: "";
+    }
+    .result-detail[open] summary {
+      margin-bottom: 10px;
+    }
+
     #scrollTopBtn {
       display: none;
       position: fixed;
@@ -341,7 +432,7 @@
             </div>
 
             <div class="summary">
-              出席 {{ upcoming_summary[practice.id].attend }} / 欠席 {{ upcoming_summary[practice.id].absent }} / 未回答 {{ upcoming_summary[practice.id].unanswered }}
+              出席 {{ upcoming_summary[practice.id].attend }} / 欠席 {{ upcoming_summary[practice.id].absent }}
             </div>
 
             <div class="people-block">
@@ -366,17 +457,6 @@
               </div>
             </div>
 
-            <div class="people-block">
-              <div class="people-title people-unanswered">未回答者</div>
-              <div class="people-list">
-                {% if upcoming_summary[practice.id].unanswered_members %}
-                  {{ upcoming_summary[practice.id].unanswered_members | join('、') }}
-                {% else %}
-                  なし
-                {% endif %}
-              </div>
-            </div>
-
             <form method="post" action="{{ url_for('edit_practice', practice_id=practice.id) }}">
               <label class="label">日程を編集</label>
               <input class="input" type="date" name="practice_date" value="{{ practice.practice_date }}" required>
@@ -393,62 +473,56 @@
         <div class="empty-box">今後の予定はありません。</div>
       {% endif %}
 
-      <div class="section-title">結果まとめ</div>
-      <div class="section-subtitle">終了した練習の結果一覧</div>
+      <div class="result-section">
+        <details class="result-toggle">
+          <summary>結果まとめ</summary>
+          <div class="result-note">過去の日程をコンパクトに確認できます</div>
 
-      {% if past_practices %}
-        {% for practice in past_practices %}
-          <div class="card">
-            <div class="practice-head">
-              <div>
-                <div class="practice-date">{{ format_date(practice.practice_date) }}</div>
+          {% if past_practices %}
+            {% for practice in past_practices %}
+              <div class="result-item">
+                <div class="result-row">
+                  <div class="result-main">{{ format_date(practice.practice_date) }} {{ practice.practice_time }}</div>
+                  <div class="result-meta">
+                    <span class="mini-badge">出席 {{ past_summary[practice.id].attend }}名</span>
+                    <span class="mini-badge">出席率 {{ past_summary[practice.id].attend_rate }}%</span>
+                  </div>
+                </div>
+
+                <details class="result-detail">
+                  <summary>詳細を見る</summary>
+
+                  <div class="people-block">
+                    <div class="people-title people-attend">出席者</div>
+                    <div class="people-list">
+                      {% if past_summary[practice.id].attend_members %}
+                        {{ past_summary[practice.id].attend_members | join('、') }}
+                      {% else %}
+                        なし
+                      {% endif %}
+                    </div>
+                  </div>
+
+                  <div class="people-block">
+                    <div class="people-title people-absent">欠席者</div>
+                    <div class="people-list">
+                      {% if past_summary[practice.id].absent_members %}
+                        {{ past_summary[practice.id].absent_members | join('、') }}
+                      {% else %}
+                        なし
+                      {% endif %}
+                    </div>
+                  </div>
+                </details>
               </div>
-              <div class="practice-time">{{ practice.practice_time }}</div>
+            {% endfor %}
+          {% else %}
+            <div class="result-item">
+              <div class="muted">結果まとめはまだありません。</div>
             </div>
-
-            <div class="rate-badge">出席率 {{ past_summary[practice.id].attend_rate }}%</div>
-
-            <div class="summary">
-              出席 {{ past_summary[practice.id].attend }} / 欠席 {{ past_summary[practice.id].absent }} / 未回答 {{ past_summary[practice.id].unanswered }}
-            </div>
-
-            <div class="people-block">
-              <div class="people-title people-attend">出席者</div>
-              <div class="people-list">
-                {% if past_summary[practice.id].attend_members %}
-                  {{ past_summary[practice.id].attend_members | join('、') }}
-                {% else %}
-                  なし
-                {% endif %}
-              </div>
-            </div>
-
-            <div class="people-block">
-              <div class="people-title people-absent">欠席者</div>
-              <div class="people-list">
-                {% if past_summary[practice.id].absent_members %}
-                  {{ past_summary[practice.id].absent_members | join('、') }}
-                {% else %}
-                  なし
-                {% endif %}
-              </div>
-            </div>
-
-            <div class="people-block">
-              <div class="people-title people-unanswered">未回答者</div>
-              <div class="people-list">
-                {% if past_summary[practice.id].unanswered_members %}
-                  {{ past_summary[practice.id].unanswered_members | join('、') }}
-                {% else %}
-                  なし
-                {% endif %}
-              </div>
-            </div>
-          </div>
-        {% endfor %}
-      {% else %}
-        <div class="empty-box">結果まとめはまだありません。</div>
-      {% endif %}
+          {% endif %}
+        </details>
+      </div>
     {% endif %}
 
     {% if page == 'member' %}
