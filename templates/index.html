@@ -80,6 +80,13 @@
       cursor: pointer;
       background: #111827;
       color: white;
+      transition: transform 0.08s ease, opacity 0.08s ease;
+    }
+    .btn:active,
+    .pill:active,
+    #scrollTopBtn:active {
+      transform: scale(0.96);
+      opacity: 0.85;
     }
     .btn-danger {
       background: #ef4444;
@@ -135,6 +142,7 @@
       font-size: 13px;
       font-weight: 700;
       cursor: pointer;
+      transition: transform 0.08s ease, opacity 0.08s ease;
     }
     .pill-attend {
       background: #111827;
@@ -146,8 +154,18 @@
     }
     .status-text {
       font-size: 12px;
-      color: #6b7280;
       margin-top: 8px;
+    }
+    .status-attend {
+      color: #16a34a;
+      font-weight: 700;
+    }
+    .status-absent {
+      color: #dc2626;
+      font-weight: 700;
+    }
+    .status-none {
+      color: #6b7280;
     }
     .logout {
       display: inline-block;
@@ -198,6 +216,22 @@
       color: #6b7280;
       font-size: 14px;
     }
+    #scrollTopBtn {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #111827;
+      color: white;
+      border: none;
+      border-radius: 999px;
+      width: 44px;
+      height: 44px;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      z-index: 999;
+    }
   </style>
 </head>
 <body>
@@ -206,8 +240,24 @@
     <div class="header">
       <img src="{{ url_for('static', filename='logo.png') }}" alt="logo" class="logo">
       <div>
-        <h1 class="title">出欠管理</h1>
-        <p class="sub">Practice schedule & availability for OB/OG</p>
+        <h1 class="title">
+          {% if page == 'admin' %}
+            管理画面
+          {% elif page == 'member' %}
+            出欠入力
+          {% else %}
+            出欠管理
+          {% endif %}
+        </h1>
+        <p class="sub">
+          {% if page == 'admin' %}
+            スケジュール管理と出欠確認
+          {% elif page == 'member' %}
+            練習の出欠を入力してください
+          {% else %}
+            Practice schedule & availability for OB/OG
+          {% endif %}
+        </p>
       </div>
     </div>
 
@@ -439,7 +489,7 @@
               </div>
             </form>
 
-            <div class="status-text">
+            <div class="status-text {% if practice.status == 'attend' %}status-attend{% elif practice.status == 'absent' %}status-absent{% else %}status-none{% endif %}">
               {% if practice.status == 'attend' %}
                 現在の回答：出席
               {% elif practice.status == 'absent' %}
@@ -456,5 +506,23 @@
     {% endif %}
 
   </div>
+
+  <button id="scrollTopBtn" onclick="scrollToTop()">↑</button>
+
+  <script>
+    const scrollTopBtn = document.getElementById("scrollTopBtn");
+
+    window.onscroll = function () {
+      if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+        scrollTopBtn.style.display = "block";
+      } else {
+        scrollTopBtn.style.display = "none";
+      }
+    };
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
 </body>
 </html>
