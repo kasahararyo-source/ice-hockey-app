@@ -60,7 +60,7 @@ def init_db():
                 id SERIAL PRIMARY KEY,
                 practice_date TEXT NOT NULL,
                 practice_time TEXT NOT NULL,
-                created_at TEXT
+                created_at TEXT NOT NULL
             )
         """)
 
@@ -156,18 +156,15 @@ def build_summary_for_practices(practices):
 
             attend_members = [r["name"] for r in rows if r["status"] == "attend"]
             absent_members = [r["name"] for r in rows if r["status"] == "absent"]
-            unanswered_members = [r["name"] for r in rows if r["status"] is None]
 
-            total = len(rows)
-            attend_rate = round((len(attend_members) / total) * 100) if total > 0 else 0
+            total_answered = len(attend_members) + len(absent_members)
+            attend_rate = round((len(attend_members) / total_answered) * 100) if total_answered > 0 else 0
 
             summary[practice["id"]] = {
                 "attend": len(attend_members),
                 "absent": len(absent_members),
-                "unanswered": len(unanswered_members),
                 "attend_members": attend_members,
                 "absent_members": absent_members,
-                "unanswered_members": unanswered_members,
                 "attend_rate": attend_rate,
             }
 
