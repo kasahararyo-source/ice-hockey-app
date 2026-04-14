@@ -99,10 +99,10 @@ def seed_default_members():
 def migrate_existing_data():
     db = get_db()
     with db.cursor() as cur:
-        cur.execute("SELECT id FROM members")
+        cur.execute("SELECT id FROM members ORDER BY id")
         members = cur.fetchall()
 
-        cur.execute("SELECT id FROM practices")
+        cur.execute("SELECT id FROM practices ORDER BY practice_date ASC, practice_time ASC")
         practices = cur.fetchall()
 
         for practice in practices:
@@ -126,8 +126,7 @@ def format_date(date_str):
     try:
         dt = datetime.strptime(date_str, "%Y-%m-%d")
         weeks = ["月", "火", "水", "木", "金", "土", "日"]
-        week = weeks[dt.weekday()]
-        return f"{dt.month}/{dt.day}({week})"
+        return f"{dt.month}/{dt.day}({weeks[dt.weekday()]})"
     except Exception:
         return date_str
 
@@ -138,6 +137,41 @@ def is_admin():
 
 def is_member():
     return session.get("role") == "member" and session.get("member_id") is not None
+
+
+def build_summary_for_practices(practices):
+    db = get_db()
+    summary = {}
+
+    with db.cursor() as cur:
+        for practice in practices:
+            cur.execute("""
+                SELECT m.name, a.status
+                FROM attendance a
+                JOIN members m ON a.member_id = m.id
+                WHERE a.practice_id = %s
+                ORDER BY m.id ASC
+            """, (practice["id"],))
+            rows = cur.fetchall()
+
+            attend_members = [r["name"] for r in rows if r["status"] == "attend"]
+            absent_members = [r["name"] for r in rows if r["status"] == "absent"]
+            unanswered_members = [r["name"] for r in rows if r["status"] is None]
+
+            total = len(rows)
+            attend_rate = round((len(attend_members) / total) * 100) if total > 0 else 0
+
+            summary[practice["id"]] = {
+                "attend": len(attend_members),
+                "absent": len(absent_members),
+                "unanswered": len(unanswered_members),
+                "attend_members": attend_members,
+                "absent_members": absent_members,
+                "unanswered_members": unanswered_members,
+                "attend_rate": attend_rate,
+            }
+
+    return summary
 
 
 @app.context_processor
@@ -201,14 +235,25 @@ def admin_page():
     if not is_admin():
         return redirect(url_for("home"))
 
+    today = datetime.now().strftime("%Y-%m-%d")
     db = get_db()
+
     with db.cursor() as cur:
         cur.execute("""
             SELECT id, practice_date, practice_time
             FROM practices
+            WHERE practice_date >= %s
             ORDER BY practice_date ASC, practice_time ASC
-        """)
-        practices = cur.fetchall()
+        """, (today,))
+        upcoming_practices = cur.fetchall()
+
+        cur.execute("""
+            SELECT id, practice_date, practice_time
+            FROM practices
+            WHERE practice_date < %s
+            ORDER BY practice_date DESC, practice_time DESC
+        """, (today,))
+        past_practices = cur.fetchall()
 
         cur.execute("""
             SELECT id, name
@@ -217,36 +262,17 @@ def admin_page():
         """)
         members = cur.fetchall()
 
-        summary = {}
-        for practice in practices:
-            cur.execute("""
-                SELECT m.name, a.status
-                FROM attendance a
-                JOIN members m ON a.member_id = m.id
-                WHERE a.practice_id = %s
-                ORDER BY m.id ASC
-            """, (practice["id"],))
-            rows = cur.fetchall()
-
-            attend_members = [r["name"] for r in rows if r["status"] == "attend"]
-            absent_members = [r["name"] for r in rows if r["status"] == "absent"]
-            unanswered_members = [r["name"] for r in rows if r["status"] is None]
-
-            summary[practice["id"]] = {
-                "attend": len(attend_members),
-                "absent": len(absent_members),
-                "unanswered": len(unanswered_members),
-                "attend_members": attend_members,
-                "absent_members": absent_members,
-                "unanswered_members": unanswered_members,
-            }
+    upcoming_summary = build_summary_for_practices(upcoming_practices)
+    past_summary = build_summary_for_practices(past_practices)
 
     return render_template(
         "index.html",
         page="admin",
-        practices=practices,
+        upcoming_practices=upcoming_practices,
+        past_practices=past_practices,
         members=members,
-        summary=summary,
+        upcoming_summary=upcoming_summary,
+        past_summary=past_summary,
     )
 
 
@@ -268,7 +294,7 @@ def add_practice():
             )
             practice_id = cur.fetchone()["id"]
 
-            cur.execute("SELECT id FROM members")
+            cur.execute("SELECT id FROM members ORDER BY id")
             members = cur.fetchall()
 
             for member in members:
@@ -337,7 +363,7 @@ def add_member():
                 )
                 member_id = cur.fetchone()["id"]
 
-                cur.execute("SELECT id FROM practices")
+                cur.execute("SELECT id FROM practices ORDER BY id")
                 practices = cur.fetchall()
 
                 for practice in practices:
@@ -359,6 +385,7 @@ def member_page():
     if not is_member():
         return redirect(url_for("home"))
 
+    today = datetime.now().strftime("%Y-%m-%d")
     db = get_db()
     member_id = session["member_id"]
 
@@ -373,8 +400,9 @@ def member_page():
             LEFT JOIN attendance a
                 ON p.id = a.practice_id
             WHERE a.member_id = %s
+              AND p.practice_date >= %s
             ORDER BY p.practice_date ASC, p.practice_time ASC
-        """, (member_id,))
+        """, (member_id, today))
         practices = cur.fetchall()
 
     return render_template(
