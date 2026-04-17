@@ -6,57 +6,125 @@
   <title>アイスホッケー出欠管理</title>
   <style>
     :root {
-      --bg: #f6f8fb;
-      --card: #ffffff;
-      --line: #d9e0ea;
-      --text: #1f2937;
-      --sub: #6b7280;
+      --bg1: #f3f7ff;
+      --bg2: #eef2ff;
+      --card: rgba(255, 255, 255, 0.88);
+      --card-strong: #ffffff;
+      --line: rgba(148, 163, 184, 0.22);
+      --text: #0f172a;
+      --sub: #64748b;
       --primary: #2563eb;
       --primary-dark: #1d4ed8;
+      --primary-soft: #dbeafe;
       --danger: #dc2626;
       --danger-dark: #b91c1c;
+      --danger-soft: #fee2e2;
       --success: #16a34a;
-      --success-bg: #dcfce7;
-      --danger-bg: #fee2e2;
-      --muted-bg: #f3f4f6;
-      --shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
-      --radius: 16px;
+      --success-dark: #15803d;
+      --success-soft: #dcfce7;
+      --muted-bg: #f8fafc;
+      --shadow-lg: 0 20px 45px rgba(15, 23, 42, 0.10);
+      --shadow-md: 0 10px 24px rgba(15, 23, 42, 0.08);
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --radius-sm: 12px;
     }
 
     * {
       box-sizing: border-box;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
-      background: var(--bg);
       color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.10), transparent 28%),
+        radial-gradient(circle at top right, rgba(99, 102, 241, 0.10), transparent 24%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      min-height: 100vh;
+    }
+
+    a {
+      color: inherit;
     }
 
     .container {
       width: 100%;
-      max-width: 960px;
+      max-width: 1040px;
       margin: 0 auto;
       padding: 20px 16px 40px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+      padding: 22px 22px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      border-radius: 28px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.88), rgba(255,255,255,0.72));
+      box-shadow: var(--shadow-lg);
+      backdrop-filter: blur(12px);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -40px;
+      top: -40px;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(37,99,235,0.12), transparent 70%);
+      pointer-events: none;
     }
 
     .page-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 20px;
+      gap: 16px;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .brand-logo {
+      width: 68px;
+      height: 68px;
+      flex: 0 0 68px;
+      border-radius: 18px;
+      object-fit: cover;
+      background: #fff;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+      padding: 6px;
+    }
+
+    .title-block {
+      min-width: 0;
     }
 
     .title-block h1 {
       margin: 0;
-      font-size: 28px;
-      line-height: 1.2;
+      font-size: 30px;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
     }
 
     .title-block p {
-      margin: 6px 0 0;
+      margin: 8px 0 0;
       color: var(--sub);
       font-size: 14px;
     }
@@ -65,15 +133,17 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-height: 42px;
-      padding: 0 14px;
-      border-radius: 12px;
-      background: #fff;
-      border: 1px solid var(--line);
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.9);
+      border: 1px solid rgba(148, 163, 184, 0.22);
       color: var(--text);
       text-decoration: none;
       font-size: 14px;
+      font-weight: 600;
       white-space: nowrap;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
     }
 
     .section {
@@ -82,46 +152,63 @@
 
     .card {
       background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-md);
+      padding: 20px;
+      backdrop-filter: blur(10px);
     }
 
     .section-title {
       margin: 0 0 14px;
       font-size: 20px;
       line-height: 1.3;
+      letter-spacing: -0.01em;
     }
 
     .sub-title {
-      margin: 0 0 12px;
-      font-size: 16px;
+      margin: 0 0 10px;
+      font-size: 15px;
       line-height: 1.3;
     }
 
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .section-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .auth-grid,
     .form-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .form-grid-3 {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr auto;
-      gap: 10px;
-      align-items: end;
+      gap: 14px;
     }
 
     .field {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 7px;
     }
 
     .field label {
       font-size: 13px;
       color: var(--sub);
+      font-weight: 600;
     }
 
     input,
@@ -135,18 +222,28 @@
     input[type="date"],
     select {
       width: 100%;
-      min-height: 44px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 10px 12px;
-      background: #fff;
+      min-height: 46px;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 14px;
+      padding: 11px 13px;
+      background: rgba(255,255,255,0.95);
       color: var(--text);
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus,
+    input[type="date"]:focus,
+    select:focus {
+      border-color: rgba(37, 99, 235, 0.42);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
     }
 
     .btn {
       min-height: 44px;
       border: none;
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 0 16px;
       cursor: pointer;
       text-decoration: none;
@@ -155,43 +252,41 @@
       justify-content: center;
       gap: 6px;
       font-size: 14px;
-      font-weight: 600;
-      transition: 0.15s ease;
+      font-weight: 700;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
     }
 
     .btn-primary {
-      background: var(--primary);
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       color: #fff;
-    }
-
-    .btn-primary:hover {
-      background: var(--primary-dark);
     }
 
     .btn-danger {
-      background: var(--danger);
+      background: linear-gradient(135deg, var(--danger), var(--danger-dark));
       color: #fff;
-    }
-
-    .btn-danger:hover {
-      background: var(--danger-dark);
-    }
-
-    .btn-muted {
-      background: var(--muted-bg);
-      color: var(--text);
-      border: 1px solid var(--line);
     }
 
     .btn-success {
-      background: var(--success);
+      background: linear-gradient(135deg, var(--success), var(--success-dark));
       color: #fff;
     }
 
-    .auth-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
+    .btn-muted {
+      background: rgba(255,255,255,0.9);
+      color: var(--text);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+    }
+
+    .inline-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
     }
 
     .practice-list {
@@ -200,10 +295,12 @@
     }
 
     .practice-card {
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px;
+      position: relative;
+      background: rgba(255,255,255,0.92);
+      border: 1px solid rgba(255,255,255,0.62);
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
     }
 
     .practice-head {
@@ -211,7 +308,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .practice-main {
@@ -221,87 +318,86 @@
     }
 
     .practice-date {
-      font-size: 18px;
-      font-weight: 700;
+      font-size: 19px;
+      font-weight: 800;
       line-height: 1.2;
+      letter-spacing: -0.02em;
     }
 
     .practice-time {
       color: var(--sub);
       font-size: 14px;
+      font-weight: 600;
     }
 
     .status-badge {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 74px;
-      min-height: 32px;
+      min-width: 78px;
+      min-height: 34px;
       padding: 0 10px;
       border-radius: 999px;
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 800;
       white-space: nowrap;
     }
 
     .status-attend {
-      background: var(--success-bg);
+      background: var(--success-soft);
       color: #166534;
     }
 
     .status-absent {
-      background: var(--danger-bg);
+      background: var(--danger-soft);
       color: #991b1b;
     }
 
     .status-none {
-      background: var(--muted-bg);
+      background: #eef2f7;
       color: var(--sub);
     }
 
-    .inline-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .inline-form {
-      display: inline;
-    }
-
-    .summary-toggle {
-      width: 100%;
-      text-align: left;
-      justify-content: space-between;
-      background: #fff;
-      color: var(--text);
-      border: 1px solid var(--line);
-    }
-
     details {
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: #fff;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 16px;
+      background: rgba(248,250,252,0.75);
       overflow: hidden;
+      margin-top: 10px;
     }
 
     details summary {
       list-style: none;
       cursor: pointer;
       padding: 14px 16px;
-      font-weight: 700;
+      font-weight: 800;
       user-select: none;
+      position: relative;
     }
 
     details summary::-webkit-details-marker {
       display: none;
     }
 
+    details summary::after {
+      content: "＋";
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--sub);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    details[open] summary::after {
+      content: "−";
+    }
+
     .summary-body {
-      border-top: 1px solid var(--line);
-      padding: 14px 16px;
-      background: #fafcff;
+      border-top: 1px solid rgba(148, 163, 184, 0.14);
+      padding: 14px 16px 16px;
+      background: rgba(255,255,255,0.76);
     }
 
     .summary-stats {
@@ -318,29 +414,28 @@
       padding: 0 12px;
       border-radius: 999px;
       font-size: 13px;
-      font-weight: 700;
-      background: var(--muted-bg);
+      font-weight: 800;
+      background: #eef2f7;
     }
 
     .chip-attend {
-      background: var(--success-bg);
+      background: var(--success-soft);
       color: #166534;
     }
 
     .chip-absent {
-      background: var(--danger-bg);
+      background: var(--danger-soft);
       color: #991b1b;
     }
 
     .chip-rate {
-      background: #dbeafe;
-      color: #1d4ed8;
+      background: var(--primary-soft);
+      color: var(--primary-dark);
     }
 
     .name-list {
       margin: 0;
       padding-left: 18px;
-      color: var(--text);
     }
 
     .name-list li {
@@ -355,10 +450,10 @@
 
     .edit-box {
       margin-top: 12px;
-      padding: 12px;
-      border: 1px dashed var(--line);
-      border-radius: 14px;
-      background: #fcfdff;
+      padding: 14px;
+      border: 1px dashed rgba(148, 163, 184, 0.30);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.70);
     }
 
     .member-table-wrap {
@@ -369,12 +464,14 @@
       width: 100%;
       border-collapse: collapse;
       min-width: 420px;
+      overflow: hidden;
+      border-radius: 14px;
     }
 
     th,
     td {
-      padding: 10px 8px;
-      border-bottom: 1px solid var(--line);
+      padding: 11px 8px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.16);
       text-align: left;
       font-size: 14px;
       vertical-align: middle;
@@ -382,24 +479,31 @@
 
     th {
       color: var(--sub);
-      font-weight: 700;
-      background: #fafcff;
+      font-weight: 800;
+      background: rgba(248,250,252,0.82);
     }
 
     .member-name {
-      font-weight: 600;
+      font-weight: 700;
     }
 
-    .note {
-      margin-top: 8px;
+    .auth-card {
+      min-height: 100%;
+    }
+
+    .home-note {
+      margin-top: 6px;
       font-size: 13px;
       color: var(--sub);
     }
 
+    .footer-space {
+      height: 10px;
+    }
+
     @media (max-width: 768px) {
       .auth-grid,
-      .form-grid,
-      .form-grid-3 {
+      .form-grid {
         grid-template-columns: 1fr;
       }
 
@@ -408,17 +512,32 @@
         flex-direction: column;
       }
 
+      .brand-wrap {
+        align-items: flex-start;
+      }
+
       .practice-head {
         align-items: flex-start;
         flex-direction: column;
       }
 
       .container {
-        padding: 16px 12px 32px;
+        padding: 14px 12px 32px;
+      }
+
+      .hero {
+        padding: 18px 16px;
+        border-radius: 22px;
+      }
+
+      .brand-logo {
+        width: 58px;
+        height: 58px;
+        flex-basis: 58px;
       }
 
       .title-block h1 {
-        font-size: 24px;
+        font-size: 25px;
       }
     }
   </style>
@@ -427,23 +546,35 @@
   <div class="container">
 
     {% if page == "home" %}
-      <div class="page-header">
-        <div class="title-block">
-          <h1>アイスホッケー出欠管理</h1>
-          <p>管理者または利用者としてログインしてください</p>
+      <div class="hero">
+        <div class="page-header">
+          <div class="brand-wrap">
+            <img
+              src="{{ url_for('static', filename='logo.png') }}"
+              alt="ロゴ"
+              class="brand-logo"
+            >
+            <div class="title-block">
+              <h1>アイスホッケー出欠管理</h1>
+              <p>管理者または利用者としてログインしてください</p>
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="auth-grid">
         <section class="section">
-          <div class="card">
-            <h2 class="section-title">管理者ログイン</h2>
+          <div class="card auth-card">
+            <div class="section-head">
+              <h2 class="section-title">管理者ログイン</h2>
+              <span class="section-badge">Admin</span>
+            </div>
             <form method="post" action="{{ url_for('login_admin') }}">
               <div class="field">
                 <label for="admin-pin">PIN</label>
                 <input type="password" id="admin-pin" name="pin" inputmode="numeric" required>
               </div>
-              <div class="inline-actions" style="margin-top: 14px;">
+              <div class="inline-actions">
                 <button type="submit" class="btn btn-primary">管理画面へ</button>
               </div>
             </form>
@@ -451,8 +582,11 @@
         </section>
 
         <section class="section">
-          <div class="card">
-            <h2 class="section-title">利用者ログイン</h2>
+          <div class="card auth-card">
+            <div class="section-head">
+              <h2 class="section-title">利用者ログイン</h2>
+              <span class="section-badge">Member</span>
+            </div>
             <form method="post" action="{{ url_for('login_member') }}">
               <div class="field">
                 <label for="member-id">名前</label>
@@ -467,7 +601,7 @@
                 <label for="member-pin">PIN</label>
                 <input type="password" id="member-pin" name="pin" inputmode="numeric" required>
               </div>
-              <div class="inline-actions" style="margin-top: 14px;">
+              <div class="inline-actions">
                 <button type="submit" class="btn btn-primary">利用者画面へ</button>
               </div>
             </form>
@@ -476,17 +610,29 @@
       </div>
 
     {% elif page == "admin" %}
-      <div class="page-header">
-        <div class="title-block">
-          <h1>管理者ページ</h1>
-          <p>日程管理とメンバー管理</p>
+      <div class="hero">
+        <div class="page-header">
+          <div class="brand-wrap">
+            <img
+              src="{{ url_for('static', filename='logo.png') }}"
+              alt="ロゴ"
+              class="brand-logo"
+            >
+            <div class="title-block">
+              <h1>管理者ページ</h1>
+              <p>日程管理とメンバー管理</p>
+            </div>
+          </div>
+          <a href="{{ url_for('logout') }}" class="logout-link">ログアウト</a>
         </div>
-        <a href="{{ url_for('logout') }}" class="logout-link">ログアウト</a>
       </div>
 
       <section class="section">
         <div class="card">
-          <h2 class="section-title">日程を追加</h2>
+          <div class="section-head">
+            <h2 class="section-title">日程を追加</h2>
+            <span class="section-badge">Practice</span>
+          </div>
           <form method="post" action="{{ url_for('add_practice') }}">
             <div class="form-grid">
               <div class="field">
@@ -513,7 +659,10 @@
 
       <section class="section">
         <div class="card">
-          <h2 class="section-title">メンバーを追加</h2>
+          <div class="section-head">
+            <h2 class="section-title">メンバーを追加</h2>
+            <span class="section-badge">Member</span>
+          </div>
           <form method="post" action="{{ url_for('add_member') }}">
             <div class="form-grid">
               <div class="field">
@@ -534,7 +683,10 @@
 
       <section class="section">
         <div class="card">
-          <h2 class="section-title">メンバー一覧</h2>
+          <div class="section-head">
+            <h2 class="section-title">メンバー一覧</h2>
+            <span class="section-badge">{{ members|length }}名</span>
+          </div>
           {% if members %}
             <div class="member-table-wrap">
               <table>
@@ -562,7 +714,10 @@
 
       <section class="section">
         <div class="card">
-          <h2 class="section-title">今後の日程</h2>
+          <div class="section-head">
+            <h2 class="section-title">今後の日程</h2>
+            <span class="section-badge">{{ upcoming_practices|length }}件</span>
+          </div>
 
           {% if upcoming_practices %}
             <div class="practice-list">
@@ -662,7 +817,10 @@
 
       <section class="section">
         <div class="card">
-          <h2 class="section-title">過去の日程</h2>
+          <div class="section-head">
+            <h2 class="section-title">過去の日程</h2>
+            <span class="section-badge">{{ past_practices|length }}件</span>
+          </div>
 
           {% if past_practices %}
             <div class="practice-list">
@@ -717,17 +875,29 @@
       </section>
 
     {% elif page == "member" %}
-      <div class="page-header">
-        <div class="title-block">
-          <h1>利用者ページ</h1>
-          <p>{{ member_name }} さんの出欠回答</p>
+      <div class="hero">
+        <div class="page-header">
+          <div class="brand-wrap">
+            <img
+              src="{{ url_for('static', filename='logo.png') }}"
+              alt="ロゴ"
+              class="brand-logo"
+            >
+            <div class="title-block">
+              <h1>利用者ページ</h1>
+              <p>{{ member_name }} さんの出欠回答</p>
+            </div>
+          </div>
+          <a href="{{ url_for('logout') }}" class="logout-link">ログアウト</a>
         </div>
-        <a href="{{ url_for('logout') }}" class="logout-link">ログアウト</a>
       </div>
 
       <section class="section">
         <div class="card">
-          <h2 class="section-title">今後の日程</h2>
+          <div class="section-head">
+            <h2 class="section-title">今後の日程</h2>
+            <span class="section-badge">{{ practices|length }}件</span>
+          </div>
 
           {% if practices %}
             <div class="practice-list">
@@ -749,12 +919,12 @@
                   </div>
 
                   <div class="inline-actions">
-                    <form method="post" action="{{ url_for('update_attendance', practice_id=practice.id) }}" class="inline-form">
+                    <form method="post" action="{{ url_for('update_attendance', practice_id=practice.id) }}">
                       <input type="hidden" name="status" value="attend">
                       <button type="submit" class="btn btn-success">出席で回答</button>
                     </form>
 
-                    <form method="post" action="{{ url_for('update_attendance', practice_id=practice.id) }}" class="inline-form">
+                    <form method="post" action="{{ url_for('update_attendance', practice_id=practice.id) }}">
                       <input type="hidden" name="status" value="absent">
                       <button type="submit" class="btn btn-danger">欠席で回答</button>
                     </form>
@@ -769,6 +939,7 @@
       </section>
     {% endif %}
 
+    <div class="footer-space"></div>
   </div>
 </body>
 </html>
