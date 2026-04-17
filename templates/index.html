@@ -43,12 +43,14 @@
       border-radius: 18px;
       padding: 16px;
       margin-bottom: 14px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      border: 1px solid #eef0f3;
     }
     .section-title {
       font-size: 16px;
       font-weight: 700;
       margin: 0 0 12px 0;
+      padding-left: 2px;
     }
     .section-subtitle {
       font-size: 13px;
@@ -125,11 +127,12 @@
     }
     .practice-time {
       font-size: 12px;
-      color: #6b7280;
-      background: #f3f4f6;
+      color: #374151;
+      background: #e5e7eb;
       padding: 6px 10px;
       border-radius: 999px;
       white-space: nowrap;
+      font-weight: 700;
     }
     .summary {
       font-size: 12px;
@@ -230,9 +233,18 @@
       border-radius: 18px;
       padding: 16px;
       margin-bottom: 14px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      border: 1px solid #eef0f3;
       color: #6b7280;
       font-size: 14px;
+    }
+
+    .edit-box {
+      margin-top: 12px;
+      padding: 12px;
+      background: #f9fafb;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
     }
 
     .result-section {
@@ -241,7 +253,8 @@
     .result-toggle {
       background: #ffffff;
       border-radius: 18px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      border: 1px solid #eef0f3;
       overflow: hidden;
     }
     .result-toggle summary {
@@ -482,24 +495,26 @@
               </div>
             </div>
 
-            <form method="post" action="{{ url_for('edit_practice', practice_id=practice.id) }}">
-              <label class="label">日程を編集</label>
-              <input class="input" type="date" name="practice_date" value="{{ practice.practice_date }}" required>
+            <div class="edit-box">
+              <form method="post" action="{{ url_for('edit_practice', practice_id=practice.id) }}">
+                <label class="label">日程を編集</label>
+                <input class="input" type="date" name="practice_date" value="{{ practice.practice_date }}" required>
 
-              <select class="select" name="practice_time" required>
-                <option value="">選択してください</option>
-                <option value="08:00" {% if practice.practice_time == "08:00" %}selected{% endif %}>8時～</option>
-                <option value="09:45" {% if practice.practice_time == "09:45" %}selected{% endif %}>9時45分～</option>
-                <option value="18:10" {% if practice.practice_time == "18:10" %}selected{% endif %}>18時10分～</option>
-                <option value="19:50" {% if practice.practice_time == "19:50" %}selected{% endif %}>19時50分～</option>
-              </select>
+                <select class="select" name="practice_time" required>
+                  <option value="">選択してください</option>
+                  <option value="08:00" {% if practice.practice_time == "08:00" %}selected{% endif %}>8時～</option>
+                  <option value="09:45" {% if practice.practice_time == "09:45" %}selected{% endif %}>9時45分～</option>
+                  <option value="18:10" {% if practice.practice_time == "18:10" %}selected{% endif %}>18時10分～</option>
+                  <option value="19:50" {% if practice.practice_time == "19:50" %}selected{% endif %}>19時50分～</option>
+                </select>
 
-              <button class="btn" type="submit">保存する</button>
-            </form>
+                <button class="btn" type="submit">保存する</button>
+              </form>
 
-            <form method="post" action="{{ url_for('delete_practice', practice_id=practice.id) }}">
-              <button class="btn btn-danger" type="submit">この練習を削除</button>
-            </form>
+              <form method="post" action="{{ url_for('delete_practice', practice_id=practice.id) }}">
+                <button class="btn btn-danger" type="submit">この練習を削除</button>
+              </form>
+            </div>
           </div>
         {% endfor %}
       {% else %}
