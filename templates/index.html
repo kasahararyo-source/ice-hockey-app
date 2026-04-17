@@ -3,943 +3,633 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>アイスホッケー出欠管理</title>
+  <title>出欠管理</title>
   <style>
-    :root {
-      --bg1: #f3f7ff;
-      --bg2: #eef2ff;
-      --card: rgba(255, 255, 255, 0.88);
-      --card-strong: #ffffff;
-      --line: rgba(148, 163, 184, 0.22);
-      --text: #0f172a;
-      --sub: #64748b;
-      --primary: #2563eb;
-      --primary-dark: #1d4ed8;
-      --primary-soft: #dbeafe;
-      --danger: #dc2626;
-      --danger-dark: #b91c1c;
-      --danger-soft: #fee2e2;
-      --success: #16a34a;
-      --success-dark: #15803d;
-      --success-soft: #dcfce7;
-      --muted-bg: #f8fafc;
-      --shadow-lg: 0 20px 45px rgba(15, 23, 42, 0.10);
-      --shadow-md: 0 10px 24px rgba(15, 23, 42, 0.08);
-      --radius-xl: 24px;
-      --radius-lg: 18px;
-      --radius-md: 14px;
-      --radius-sm: 12px;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
+    * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(59, 130, 246, 0.10), transparent 28%),
-        radial-gradient(circle at top right, rgba(99, 102, 241, 0.10), transparent 24%),
-        linear-gradient(180deg, var(--bg1), var(--bg2));
-      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f3f4f6;
+      color: #111827;
     }
-
-    a {
-      color: inherit;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 1040px;
+    .wrap {
+      max-width: 560px;
       margin: 0 auto;
-      padding: 20px 16px 40px;
+      padding: 16px;
     }
-
-    .hero {
-      position: relative;
-      overflow: hidden;
-      margin-bottom: 20px;
-      padding: 22px 22px 20px;
-      border: 1px solid rgba(255, 255, 255, 0.45);
-      border-radius: 28px;
-      background:
-        linear-gradient(135deg, rgba(255,255,255,0.88), rgba(255,255,255,0.72));
-      box-shadow: var(--shadow-lg);
-      backdrop-filter: blur(12px);
-    }
-
-    .hero::after {
-      content: "";
-      position: absolute;
-      right: -40px;
-      top: -40px;
-      width: 180px;
-      height: 180px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(37,99,235,0.12), transparent 70%);
-      pointer-events: none;
-    }
-
-    .page-header {
+    .header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .brand-wrap {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      min-width: 0;
-    }
-
-    .brand-logo {
-      width: 68px;
-      height: 68px;
-      flex: 0 0 68px;
-      border-radius: 18px;
-      object-fit: cover;
-      background: #fff;
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
-      padding: 6px;
-    }
-
-    .title-block {
-      min-width: 0;
-    }
-
-    .title-block h1 {
-      margin: 0;
-      font-size: 30px;
-      line-height: 1.15;
-      letter-spacing: -0.02em;
-    }
-
-    .title-block p {
-      margin: 8px 0 0;
-      color: var(--sub);
-      font-size: 14px;
-    }
-
-    .logout-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 44px;
-      padding: 0 16px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.9);
-      border: 1px solid rgba(148, 163, 184, 0.22);
-      color: var(--text);
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 600;
-      white-space: nowrap;
-      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
-    }
-
-    .section {
-      margin-bottom: 20px;
-    }
-
-    .card {
-      background: var(--card);
-      border: 1px solid rgba(255, 255, 255, 0.55);
-      border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-md);
-      padding: 20px;
-      backdrop-filter: blur(10px);
-    }
-
-    .section-title {
-      margin: 0 0 14px;
-      font-size: 20px;
-      line-height: 1.3;
-      letter-spacing: -0.01em;
-    }
-
-    .sub-title {
-      margin: 0 0 10px;
-      font-size: 15px;
-      line-height: 1.3;
-    }
-
-    .section-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
       gap: 10px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
-
-    .section-badge {
-      display: inline-flex;
-      align-items: center;
-      min-height: 28px;
-      padding: 0 10px;
-      border-radius: 999px;
-      background: var(--primary-soft);
-      color: var(--primary-dark);
-      font-size: 12px;
+    .logo {
+      height: 36px;
+      width: auto;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
+    }
+    .title {
+      font-size: 22px;
       font-weight: 700;
+      margin: 0;
     }
-
-    .auth-grid,
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-    }
-
-    .field label {
+    .sub {
+      color: #6b7280;
       font-size: 13px;
-      color: var(--sub);
-      font-weight: 600;
+      margin: 4px 0 0 0;
+    }
+    .card {
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0 0 12px 0;
+    }
+    .section-subtitle {
+      font-size: 13px;
+      color: #6b7280;
+      margin: -4px 0 12px 0;
+    }
+    .label {
+      display: block;
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 6px;
     }
 
-    input,
-    select,
-    button {
-      font: inherit;
+    .input, .select {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      font-size: 14px;
+      margin-bottom: 12px;
+      background: #fff;
     }
 
+    input[type="date"],
     input[type="text"],
     input[type="password"],
-    input[type="date"],
     select {
       width: 100%;
-      min-height: 46px;
-      border: 1px solid rgba(148, 163, 184, 0.22);
-      border-radius: 14px;
-      padding: 11px 13px;
-      background: rgba(255,255,255,0.95);
-      color: var(--text);
-      outline: none;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+      max-width: 100%;
+      min-width: 0;
+      display: block;
     }
 
-    input[type="text"]:focus,
-    input[type="password"]:focus,
-    input[type="date"]:focus,
-    select:focus {
-      border-color: rgba(37, 99, 235, 0.42);
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.10);
+    .card form {
+      width: 100%;
+      overflow: hidden;
     }
 
     .btn {
-      min-height: 44px;
+      width: 100%;
       border: none;
-      border-radius: 14px;
-      padding: 0 16px;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
+      border-radius: 12px;
+      padding: 12px 14px;
       font-size: 14px;
       font-weight: 700;
-      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
-      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+      cursor: pointer;
+      background: #111827;
+      color: white;
+      transition: transform 0.08s ease, opacity 0.08s ease;
     }
-
-    .btn:hover {
-      transform: translateY(-1px);
+    .btn:active,
+    .pill:active,
+    #scrollTopBtn:active {
+      transform: scale(0.96);
+      opacity: 0.85;
     }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      color: #fff;
-    }
-
     .btn-danger {
-      background: linear-gradient(135deg, var(--danger), var(--danger-dark));
-      color: #fff;
+      background: #ef4444;
+      color: white;
+      margin-top: 8px;
     }
-
-    .btn-success {
-      background: linear-gradient(135deg, var(--success), var(--success-dark));
-      color: #fff;
-    }
-
-    .btn-muted {
-      background: rgba(255,255,255,0.9);
-      color: var(--text);
-      border: 1px solid rgba(148, 163, 184, 0.22);
-    }
-
-    .inline-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 14px;
-    }
-
-    .practice-list {
-      display: grid;
-      gap: 14px;
-    }
-
-    .practice-card {
-      position: relative;
-      background: rgba(255,255,255,0.92);
-      border: 1px solid rgba(255,255,255,0.62);
-      border-radius: 20px;
-      padding: 16px;
-      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
-    }
-
     .practice-head {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      align-items: start;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .practice-date {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .practice-time {
+      font-size: 12px;
+      color: #6b7280;
+      background: #f3f4f6;
+      padding: 6px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .summary {
+      font-size: 12px;
+      color: #6b7280;
       margin-bottom: 12px;
     }
-
-    .practice-main {
+    .member-row {
       display: flex;
-      flex-direction: column;
-      gap: 4px;
+      justify-content: space-between;
+      align-items: center;
+      background: #f9fafb;
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 8px;
     }
-
-    .practice-date {
-      font-size: 19px;
-      font-weight: 800;
-      line-height: 1.2;
-      letter-spacing: -0.02em;
-    }
-
-    .practice-time {
-      color: var(--sub);
+    .member-name {
       font-size: 14px;
       font-weight: 600;
     }
-
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 78px;
-      min-height: 34px;
-      padding: 0 10px;
+    .pill-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .pill {
+      border: none;
+      padding: 10px 14px;
       border-radius: 999px;
       font-size: 13px;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    .status-attend {
-      background: var(--success-soft);
-      color: #166534;
-    }
-
-    .status-absent {
-      background: var(--danger-soft);
-      color: #991b1b;
-    }
-
-    .status-none {
-      background: #eef2f7;
-      color: var(--sub);
-    }
-
-    details {
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      border-radius: 16px;
-      background: rgba(248,250,252,0.75);
-      overflow: hidden;
-      margin-top: 10px;
-    }
-
-    details summary {
-      list-style: none;
+      font-weight: 700;
       cursor: pointer;
-      padding: 14px 16px;
-      font-weight: 800;
-      user-select: none;
-      position: relative;
+      transition: transform 0.08s ease, opacity 0.08s ease;
     }
-
-    details summary::-webkit-details-marker {
-      display: none;
+    .pill-attend {
+      background: #111827;
+      color: white;
     }
-
-    details summary::after {
-      content: "＋";
-      position: absolute;
-      right: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--sub);
-      font-size: 18px;
+    .pill-absent {
+      background: #e5e7eb;
+      color: #111827;
+    }
+    .status-text {
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    .status-attend {
+      color: #16a34a;
       font-weight: 700;
     }
-
-    details[open] summary::after {
-      content: "−";
+    .status-absent {
+      color: #dc2626;
+      font-weight: 700;
     }
-
-    .summary-body {
-      border-top: 1px solid rgba(148, 163, 184, 0.14);
-      padding: 14px 16px 16px;
-      background: rgba(255,255,255,0.76);
+    .status-none {
+      color: #6b7280;
     }
-
-    .summary-stats {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      min-height: 34px;
-      padding: 0 12px;
-      border-radius: 999px;
+    .logout {
+      display: inline-block;
+      text-decoration: none;
+      color: #6b7280;
       font-size: 13px;
-      font-weight: 800;
-      background: #eef2f7;
+      margin-bottom: 16px;
     }
-
-    .chip-attend {
-      background: var(--success-soft);
-      color: #166534;
+    .muted {
+      color: #6b7280;
+      font-size: 12px;
     }
-
-    .chip-absent {
-      background: var(--danger-soft);
-      color: #991b1b;
+    .people-block {
+      margin-bottom: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #f9fafb;
     }
-
-    .chip-rate {
-      background: var(--primary-soft);
-      color: var(--primary-dark);
-    }
-
-    .name-list {
-      margin: 0;
-      padding-left: 18px;
-    }
-
-    .name-list li {
+    .people-title {
+      font-size: 12px;
+      font-weight: 700;
       margin-bottom: 4px;
     }
-
-    .empty {
-      color: var(--sub);
-      font-size: 14px;
-      margin: 0;
-    }
-
-    .edit-box {
-      margin-top: 12px;
-      padding: 14px;
-      border: 1px dashed rgba(148, 163, 184, 0.30);
-      border-radius: 16px;
-      background: rgba(255,255,255,0.70);
-    }
-
-    .member-table-wrap {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 420px;
-      overflow: hidden;
-      border-radius: 14px;
-    }
-
-    th,
-    td {
-      padding: 11px 8px;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.16);
-      text-align: left;
-      font-size: 14px;
-      vertical-align: middle;
-    }
-
-    th {
-      color: var(--sub);
-      font-weight: 800;
-      background: rgba(248,250,252,0.82);
-    }
-
-    .member-name {
-      font-weight: 700;
-    }
-
-    .auth-card {
-      min-height: 100%;
-    }
-
-    .home-note {
-      margin-top: 6px;
+    .people-attend { color: #16a34a; }
+    .people-absent { color: #dc2626; }
+    .people-list {
       font-size: 13px;
-      color: var(--sub);
+      color: #374151;
+      line-height: 1.5;
+    }
+    .rate-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #111827;
+      background: #e5e7eb;
+      padding: 6px 10px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+    .empty-box {
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      color: #6b7280;
+      font-size: 14px;
     }
 
-    .footer-space {
-      height: 10px;
+    .result-section {
+      margin-bottom: 16px;
+    }
+    .result-toggle {
+      background: #ffffff;
+      border-radius: 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    .result-toggle summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .result-toggle summary::-webkit-details-marker {
+      display: none;
+    }
+    .result-toggle summary::after {
+      content: "＋";
+      font-size: 20px;
+      color: #6b7280;
+      line-height: 1;
+    }
+    .result-toggle[open] summary::after {
+      content: "−";
+    }
+    .result-note {
+      padding: 0 16px 12px 16px;
+      font-size: 13px;
+      color: #6b7280;
     }
 
-    @media (max-width: 768px) {
-      .auth-grid,
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
+    .result-item {
+      border-top: 1px solid #f3f4f6;
+      padding: 14px 16px;
+    }
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .result-main {
+      font-size: 14px;
+      font-weight: 700;
+      color: #111827;
+    }
+    .result-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .mini-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #111827;
+      background: #e5e7eb;
+      padding: 6px 10px;
+      border-radius: 999px;
+    }
 
-      .page-header {
-        align-items: flex-start;
-        flex-direction: column;
-      }
+    .result-detail {
+      margin-top: 10px;
+    }
+    .result-detail summary {
+      padding: 0;
+      font-size: 13px;
+      font-weight: 700;
+      color: #111827;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      box-shadow: none;
+      border-radius: 0;
+    }
+    .result-detail summary::after {
+      content: "";
+    }
+    .result-detail[open] summary {
+      margin-bottom: 10px;
+    }
 
-      .brand-wrap {
-        align-items: flex-start;
-      }
-
-      .practice-head {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-
-      .container {
-        padding: 14px 12px 32px;
-      }
-
-      .hero {
-        padding: 18px 16px;
-        border-radius: 22px;
-      }
-
-      .brand-logo {
-        width: 58px;
-        height: 58px;
-        flex-basis: 58px;
-      }
-
-      .title-block h1 {
-        font-size: 25px;
-      }
+    #scrollTopBtn {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #111827;
+      color: white;
+      border: none;
+      border-radius: 999px;
+      width: 44px;
+      height: 44px;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      z-index: 999;
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="wrap">
 
-    {% if page == "home" %}
-      <div class="hero">
-        <div class="page-header">
-          <div class="brand-wrap">
-            <img
-              src="{{ url_for('static', filename='logo.png') }}"
-              alt="ロゴ"
-              class="brand-logo"
-            >
-            <div class="title-block">
-              <h1>アイスホッケー出欠管理</h1>
-              <p>管理者または利用者としてログインしてください</p>
-            </div>
-          </div>
-        </div>
+    <div class="header">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="logo" class="logo">
+      <div>
+        <h1 class="title">
+          {% if page == 'admin' %}
+            管理画面
+          {% elif page == 'member' %}
+            出欠入力
+          {% else %}
+            出欠管理
+          {% endif %}
+        </h1>
+        <p class="sub">
+          {% if page == 'admin' %}
+            スケジュール管理と出欠確認
+          {% elif page == 'member' %}
+            練習の出欠を入力してください
+          {% else %}
+            Practice schedule & availability for OB/OG
+          {% endif %}
+        </p>
+      </div>
+    </div>
+
+    {% if page == 'home' %}
+      <div class="card">
+        <div class="section-title">管理者ログイン</div>
+        <form method="post" action="{{ url_for('login_admin') }}">
+          <label class="label">管理者PIN</label>
+          <input class="input" type="password" name="pin" placeholder="管理者PINを入力" required>
+          <button class="btn" type="submit">管理者ページへ</button>
+        </form>
       </div>
 
-      <div class="auth-grid">
-        <section class="section">
-          <div class="card auth-card">
-            <div class="section-head">
-              <h2 class="section-title">管理者ログイン</h2>
-              <span class="section-badge">Admin</span>
-            </div>
-            <form method="post" action="{{ url_for('login_admin') }}">
-              <div class="field">
-                <label for="admin-pin">PIN</label>
-                <input type="password" id="admin-pin" name="pin" inputmode="numeric" required>
-              </div>
-              <div class="inline-actions">
-                <button type="submit" class="btn btn-primary">管理画面へ</button>
-              </div>
-            </form>
-          </div>
-        </section>
+      <div class="card">
+        <div class="section-title">登録者ログイン</div>
+        <form method="post" action="{{ url_for('login_member') }}">
+          <label class="label">名前</label>
+          <select class="select" name="member_id" required>
+            <option value="">選択してください</option>
+            {% for member in members %}
+              <option value="{{ member.id }}">{{ member.name }}</option>
+            {% endfor %}
+          </select>
 
-        <section class="section">
-          <div class="card auth-card">
-            <div class="section-head">
-              <h2 class="section-title">利用者ログイン</h2>
-              <span class="section-badge">Member</span>
-            </div>
-            <form method="post" action="{{ url_for('login_member') }}">
-              <div class="field">
-                <label for="member-id">名前</label>
-                <select id="member-id" name="member_id" required>
-                  <option value="">選択してください</option>
-                  {% for member in members %}
-                    <option value="{{ member.id }}">{{ member.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-              <div class="field" style="margin-top: 12px;">
-                <label for="member-pin">PIN</label>
-                <input type="password" id="member-pin" name="pin" inputmode="numeric" required>
-              </div>
-              <div class="inline-actions">
-                <button type="submit" class="btn btn-primary">利用者画面へ</button>
-              </div>
-            </form>
-          </div>
-        </section>
+          <label class="label">PIN</label>
+          <input class="input" type="password" name="pin" placeholder="PINを入力" required>
+          <button class="btn" type="submit">回答ページへ</button>
+        </form>
       </div>
-
-    {% elif page == "admin" %}
-      <div class="hero">
-        <div class="page-header">
-          <div class="brand-wrap">
-            <img
-              src="{{ url_for('static', filename='logo.png') }}"
-              alt="ロゴ"
-              class="brand-logo"
-            >
-            <div class="title-block">
-              <h1>管理者ページ</h1>
-              <p>日程管理とメンバー管理</p>
-            </div>
-          </div>
-          <a href="{{ url_for('logout') }}" class="logout-link">ログアウト</a>
-        </div>
-      </div>
-
-      <section class="section">
-        <div class="card">
-          <div class="section-head">
-            <h2 class="section-title">日程を追加</h2>
-            <span class="section-badge">Practice</span>
-          </div>
-          <form method="post" action="{{ url_for('add_practice') }}">
-            <div class="form-grid">
-              <div class="field">
-                <label for="practice_date">日付</label>
-                <input type="date" id="practice_date" name="practice_date" required>
-              </div>
-              <div class="field">
-                <label for="practice_time">開始時間</label>
-                <select id="practice_time" name="practice_time" required>
-                  <option value="">選択してください</option>
-                  <option value="08:00">8時～</option>
-                  <option value="09:45">9時45分～</option>
-                  <option value="18:10" selected>18時10分～</option>
-                  <option value="19:50">19時50分～</option>
-                </select>
-              </div>
-            </div>
-            <div class="inline-actions">
-              <button type="submit" class="btn btn-primary">追加する</button>
-            </div>
-          </form>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="card">
-          <div class="section-head">
-            <h2 class="section-title">メンバーを追加</h2>
-            <span class="section-badge">Member</span>
-          </div>
-          <form method="post" action="{{ url_for('add_member') }}">
-            <div class="form-grid">
-              <div class="field">
-                <label for="member_name">名前</label>
-                <input type="text" id="member_name" name="name" required>
-              </div>
-              <div class="field">
-                <label for="member_pin">PIN</label>
-                <input type="password" id="member_pin" name="pin" inputmode="numeric" required>
-              </div>
-            </div>
-            <div class="inline-actions">
-              <button type="submit" class="btn btn-primary">追加する</button>
-            </div>
-          </form>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="card">
-          <div class="section-head">
-            <h2 class="section-title">メンバー一覧</h2>
-            <span class="section-badge">{{ members|length }}名</span>
-          </div>
-          {% if members %}
-            <div class="member-table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>名前</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for member in members %}
-                    <tr>
-                      <td>{{ member.id }}</td>
-                      <td class="member-name">{{ member.name }}</td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          {% else %}
-            <p class="empty">メンバーがまだ登録されていません。</p>
-          {% endif %}
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="card">
-          <div class="section-head">
-            <h2 class="section-title">今後の日程</h2>
-            <span class="section-badge">{{ upcoming_practices|length }}件</span>
-          </div>
-
-          {% if upcoming_practices %}
-            <div class="practice-list">
-              {% for practice in upcoming_practices %}
-                <div class="practice-card">
-                  <div class="practice-head">
-                    <div class="practice-main">
-                      <div class="practice-date">{{ format_date(practice.practice_date) }}</div>
-                      <div class="practice-time">{{ practice.practice_time }} 開始</div>
-                    </div>
-                  </div>
-
-                  <details>
-                    <summary>結果まとめを見る</summary>
-                    <div class="summary-body">
-                      <div class="summary-stats">
-                        <span class="chip chip-attend">出席 {{ upcoming_summary[practice.id].attend }}</span>
-                        <span class="chip chip-absent">欠席 {{ upcoming_summary[practice.id].absent }}</span>
-                        <span class="chip chip-rate">出席率 {{ upcoming_summary[practice.id].attend_rate }}%</span>
-                      </div>
-
-                      <h3 class="sub-title">出席</h3>
-                      {% if upcoming_summary[practice.id].attend_members %}
-                        <ul class="name-list">
-                          {% for name in upcoming_summary[practice.id].attend_members %}
-                            <li>{{ name }}</li>
-                          {% endfor %}
-                        </ul>
-                      {% else %}
-                        <p class="empty">まだ回答がありません。</p>
-                      {% endif %}
-
-                      <h3 class="sub-title" style="margin-top: 14px;">欠席</h3>
-                      {% if upcoming_summary[practice.id].absent_members %}
-                        <ul class="name-list">
-                          {% for name in upcoming_summary[practice.id].absent_members %}
-                            <li>{{ name }}</li>
-                          {% endfor %}
-                        </ul>
-                      {% else %}
-                        <p class="empty">まだ回答がありません。</p>
-                      {% endif %}
-                    </div>
-                  </details>
-
-                  <div class="edit-box">
-                    <form method="post" action="{{ url_for('edit_practice', practice_id=practice.id) }}">
-                      <div class="form-grid">
-                        <div class="field">
-                          <label for="edit_date_{{ practice.id }}">日付</label>
-                          <input
-                            type="date"
-                            id="edit_date_{{ practice.id }}"
-                            name="practice_date"
-                            value="{{ practice.practice_date }}"
-                            required
-                          >
-                        </div>
-                        <div class="field">
-                          <label for="edit_time_{{ practice.id }}">開始時間</label>
-                          <select
-                            id="edit_time_{{ practice.id }}"
-                            name="practice_time"
-                            required
-                          >
-                            <option value="">選択してください</option>
-                            <option value="08:00" {% if practice.practice_time == "08:00" %}selected{% endif %}>8時～</option>
-                            <option value="09:45" {% if practice.practice_time == "09:45" %}selected{% endif %}>9時45分～</option>
-                            <option value="18:10" {% if practice.practice_time == "18:10" %}selected{% endif %}>18時10分～</option>
-                            <option value="19:50" {% if practice.practice_time == "19:50" %}selected{% endif %}>19時50分～</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div class="inline-actions">
-                        <button type="submit" class="btn btn-primary">更新する</button>
-                      </div>
-                    </form>
-
-                    <form
-                      method="post"
-                      action="{{ url_for('delete_practice', practice_id=practice.id) }}"
-                      onsubmit="return confirm('この日程を削除しますか？');"
-                      style="margin-top: 8px;"
-                    >
-                      <button type="submit" class="btn btn-danger">削除する</button>
-                    </form>
-                  </div>
-                </div>
-              {% endfor %}
-            </div>
-          {% else %}
-            <p class="empty">今後の日程はありません。</p>
-          {% endif %}
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="card">
-          <div class="section-head">
-            <h2 class="section-title">過去の日程</h2>
-            <span class="section-badge">{{ past_practices|length }}件</span>
-          </div>
-
-          {% if past_practices %}
-            <div class="practice-list">
-              {% for practice in past_practices %}
-                <div class="practice-card">
-                  <div class="practice-head">
-                    <div class="practice-main">
-                      <div class="practice-date">{{ format_date(practice.practice_date) }}</div>
-                      <div class="practice-time">{{ practice.practice_time }} 開始</div>
-                    </div>
-                  </div>
-
-                  <details>
-                    <summary>結果まとめを見る</summary>
-                    <div class="summary-body">
-                      <div class="summary-stats">
-                        <span class="chip chip-attend">出席 {{ past_summary[practice.id].attend }}</span>
-                        <span class="chip chip-absent">欠席 {{ past_summary[practice.id].absent }}</span>
-                        <span class="chip chip-rate">出席率 {{ past_summary[practice.id].attend_rate }}%</span>
-                      </div>
-
-                      <h3 class="sub-title">出席</h3>
-                      {% if past_summary[practice.id].attend_members %}
-                        <ul class="name-list">
-                          {% for name in past_summary[practice.id].attend_members %}
-                            <li>{{ name }}</li>
-                          {% endfor %}
-                        </ul>
-                      {% else %}
-                        <p class="empty">回答はありません。</p>
-                      {% endif %}
-
-                      <h3 class="sub-title" style="margin-top: 14px;">欠席</h3>
-                      {% if past_summary[practice.id].absent_members %}
-                        <ul class="name-list">
-                          {% for name in past_summary[practice.id].absent_members %}
-                            <li>{{ name }}</li>
-                          {% endfor %}
-                        </ul>
-                      {% else %}
-                        <p class="empty">回答はありません。</p>
-                      {% endif %}
-                    </div>
-                  </details>
-                </div>
-              {% endfor %}
-            </div>
-          {% else %}
-            <p class="empty">過去の日程はありません。</p>
-          {% endif %}
-        </div>
-      </section>
-
-    {% elif page == "member" %}
-      <div class="hero">
-        <div class="page-header">
-          <div class="brand-wrap">
-            <img
-              src="{{ url_for('static', filename='logo.png') }}"
-              alt="ロゴ"
-              class="brand-logo"
-            >
-            <div class="title-block">
-              <h1>利用者ページ</h1>
-              <p>{{ member_name }} さんの出欠回答</p>
-            </div>
-          </div>
-          <a href="{{ url_for('logout') }}" class="logout-link">ログアウト</a>
-        </div>
-      </div>
-
-      <section class="section">
-        <div class="card">
-          <div class="section-head">
-            <h2 class="section-title">今後の日程</h2>
-            <span class="section-badge">{{ practices|length }}件</span>
-          </div>
-
-          {% if practices %}
-            <div class="practice-list">
-              {% for practice in practices %}
-                <div class="practice-card">
-                  <div class="practice-head">
-                    <div class="practice-main">
-                      <div class="practice-date">{{ format_date(practice.practice_date) }}</div>
-                      <div class="practice-time">{{ practice.practice_time }} 開始</div>
-                    </div>
-
-                    {% if practice.status == "attend" %}
-                      <span class="status-badge status-attend">出席</span>
-                    {% elif practice.status == "absent" %}
-                      <span class="status-badge status-absent">欠席</span>
-                    {% else %}
-                      <span class="status-badge status-none">未回答</span>
-                    {% endif %}
-                  </div>
-
-                  <div class="inline-actions">
-                    <form method="post" action="{{ url_for('update_attendance', practice_id=practice.id) }}">
-                      <input type="hidden" name="status" value="attend">
-                      <button type="submit" class="btn btn-success">出席で回答</button>
-                    </form>
-
-                    <form method="post" action="{{ url_for('update_attendance', practice_id=practice.id) }}">
-                      <input type="hidden" name="status" value="absent">
-                      <button type="submit" class="btn btn-danger">欠席で回答</button>
-                    </form>
-                  </div>
-                </div>
-              {% endfor %}
-            </div>
-          {% else %}
-            <p class="empty">回答対象の日程はありません。</p>
-          {% endif %}
-        </div>
-      </section>
     {% endif %}
 
-    <div class="footer-space"></div>
+    {% if page == 'admin' %}
+      <a class="logout" href="{{ url_for('logout') }}">← ログアウト</a>
+
+      <div class="card">
+        <div class="section-title">練習を登録</div>
+        <form method="post" action="{{ url_for('add_practice') }}">
+          <label class="label">練習日</label>
+          <input class="input" type="date" name="practice_date" required>
+
+          <label class="label">練習時間</label>
+          <select class="select" name="practice_time" required>
+            <option value="">選択してください</option>
+            <option value="08:00">8時～</option>
+            <option value="09:45">9時45分～</option>
+            <option value="18:10" selected>18時10分～</option>
+            <option value="19:50">19時50分～</option>
+          </select>
+
+          <button class="btn" type="submit">登録する</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="section-title">登録者を追加</div>
+        <form method="post" action="{{ url_for('add_member') }}">
+          <label class="label">名前</label>
+          <input class="input" type="text" name="name" placeholder="例 田中太郎" required>
+
+          <label class="label">PIN</label>
+          <input class="input" type="text" name="pin" placeholder="6桁推奨" required>
+
+          <button class="btn" type="submit">登録者を追加</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="section-title">登録者一覧</div>
+        {% for member in members %}
+          <div class="member-row">
+            <div class="member-name">{{ member.name }}</div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="section-title">今後の予定</div>
+      <div class="section-subtitle">これからの練習予定と出欠状況</div>
+
+      {% if upcoming_practices %}
+        {% for practice in upcoming_practices %}
+          <div class="card">
+            <div class="practice-head">
+              <div>
+                <div class="practice-date">{{ format_date(practice.practice_date) }}</div>
+              </div>
+              <div class="practice-time">{{ practice.practice_time }}</div>
+            </div>
+
+            <div class="summary">
+              出席 {{ upcoming_summary[practice.id].attend }} / 欠席 {{ upcoming_summary[practice.id].absent }}
+            </div>
+
+            <div class="people-block">
+              <div class="people-title people-attend">出席者</div>
+              <div class="people-list">
+                {% if upcoming_summary[practice.id].attend_members %}
+                  {{ upcoming_summary[practice.id].attend_members | join('、') }}
+                {% else %}
+                  なし
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="people-block">
+              <div class="people-title people-absent">欠席者</div>
+              <div class="people-list">
+                {% if upcoming_summary[practice.id].absent_members %}
+                  {{ upcoming_summary[practice.id].absent_members | join('、') }}
+                {% else %}
+                  なし
+                {% endif %}
+              </div>
+            </div>
+
+            <form method="post" action="{{ url_for('edit_practice', practice_id=practice.id) }}">
+              <label class="label">日程を編集</label>
+              <input class="input" type="date" name="practice_date" value="{{ practice.practice_date }}" required>
+
+              <select class="select" name="practice_time" required>
+                <option value="">選択してください</option>
+                <option value="08:00" {% if practice.practice_time == "08:00" %}selected{% endif %}>8時～</option>
+                <option value="09:45" {% if practice.practice_time == "09:45" %}selected{% endif %}>9時45分～</option>
+                <option value="18:10" {% if practice.practice_time == "18:10" %}selected{% endif %}>18時10分～</option>
+                <option value="19:50" {% if practice.practice_time == "19:50" %}selected{% endif %}>19時50分～</option>
+              </select>
+
+              <button class="btn" type="submit">保存する</button>
+            </form>
+
+            <form method="post" action="{{ url_for('delete_practice', practice_id=practice.id) }}">
+              <button class="btn btn-danger" type="submit">この練習を削除</button>
+            </form>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-box">今後の予定はありません。</div>
+      {% endif %}
+
+      <div class="result-section">
+        <details class="result-toggle">
+          <summary>結果まとめ</summary>
+          <div class="result-note">過去の日程をコンパクトに確認できます</div>
+
+          {% if past_practices %}
+            {% for practice in past_practices %}
+              <div class="result-item">
+                <div class="result-row">
+                  <div class="result-main">{{ format_date(practice.practice_date) }} {{ practice.practice_time }}</div>
+                  <div class="result-meta">
+                    <span class="mini-badge">出席 {{ past_summary[practice.id].attend }}名</span>
+                    <span class="mini-badge">出席率 {{ past_summary[practice.id].attend_rate }}%</span>
+                  </div>
+                </div>
+
+                <details class="result-detail">
+                  <summary>詳細を見る</summary>
+
+                  <div class="people-block">
+                    <div class="people-title people-attend">出席者</div>
+                    <div class="people-list">
+                      {% if past_summary[practice.id].attend_members %}
+                        {{ past_summary[practice.id].attend_members | join('、') }}
+                      {% else %}
+                        なし
+                      {% endif %}
+                    </div>
+                  </div>
+
+                  <div class="people-block">
+                    <div class="people-title people-absent">欠席者</div>
+                    <div class="people-list">
+                      {% if past_summary[practice.id].absent_members %}
+                        {{ past_summary[practice.id].absent_members | join('、') }}
+                      {% else %}
+                        なし
+                      {% endif %}
+                    </div>
+                  </div>
+                </details>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="result-item">
+              <div class="muted">結果まとめはまだありません。</div>
+            </div>
+          {% endif %}
+        </details>
+      </div>
+    {% endif %}
+
+    {% if page == 'member' %}
+      <a class="logout" href="{{ url_for('logout') }}">← ログアウト</a>
+
+      <div class="card">
+        <div class="section-title">{{ member_name }}</div>
+        <div class="muted">今後の予定のみ表示しています</div>
+      </div>
+
+      {% if practices %}
+        {% for practice in practices %}
+          <div class="card">
+            <div class="practice-head">
+              <div class="practice-date">{{ format_date(practice.practice_date) }}</div>
+              <div class="practice-time">{{ practice.practice_time }}</div>
+            </div>
+
+            <form method="post" action="{{ url_for('update_attendance', practice_id=practice.id) }}">
+              <div class="pill-row">
+                <button
+                  class="pill {% if practice.status == 'attend' %}pill-attend{% else %}pill-absent{% endif %}"
+                  type="submit"
+                  name="status"
+                  value="attend"
+                >
+                  出席
+                </button>
+
+                <button
+                  class="pill {% if practice.status == 'absent' %}pill-attend{% else %}pill-absent{% endif %}"
+                  type="submit"
+                  name="status"
+                  value="absent"
+                >
+                  欠席
+                </button>
+              </div>
+            </form>
+
+            <div class="status-text {% if practice.status == 'attend' %}status-attend{% elif practice.status == 'absent' %}status-absent{% else %}status-none{% endif %}">
+              {% if practice.status == 'attend' %}
+                現在の回答：出席
+              {% elif practice.status == 'absent' %}
+                現在の回答：欠席
+              {% else %}
+                現在の回答：未回答
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-box">今後の予定はありません。</div>
+      {% endif %}
+    {% endif %}
+
   </div>
+
+  <button id="scrollTopBtn" onclick="scrollToTop()">↑</button>
+
+  <script>
+    const scrollTopBtn = document.getElementById("scrollTopBtn");
+
+    window.onscroll = function () {
+      if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+        scrollTopBtn.style.display = "block";
+      } else {
+        scrollTopBtn.style.display = "none";
+      }
+    };
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
 </body>
 </html>
