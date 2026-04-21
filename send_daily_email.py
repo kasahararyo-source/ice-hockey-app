@@ -1,10 +1,11 @@
 import os
+import smtplib
+from email.mime.text import MIMEText
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
 import psycopg
 from psycopg.rows import dict_row
-import resend
 
 
 JST = ZoneInfo("Asia/Tokyo")
@@ -18,8 +19,7 @@ def get_env(name: str) -> str:
 
 
 def get_db_connection():
-    database_url = get_env("DATABASE_URL")
-    return psycopg.connect(database_url)
+    return psycopg.connect(get_env("DATABASE_URL"))
 
 
 def get_today_jst():
@@ -31,116 +31,76 @@ def fetch_today_attendance_rows():
 
     query = """
         SELECT
-            p.id AS practice_id,
-            p.practice_date,
             p.practice_time,
             m.name,
             a.status
         FROM practices p
-        LEFT JOIN attendance a
-            ON p.id = a.practice_id
-        LEFT JOIN members m
-            ON a.member_id = m.id
+        LEFT JOIN attendance a ON p.id = a.practice_id
+        LEFT JOIN members m ON a.member_id = m.id
         WHERE p.practice_date = %s
-        ORDER BY p.practice_time ASC, m.id ASC
+        ORDER BY m.id ASC
     """
 
     with get_db_connection() as conn:
         with conn.cursor(row_factory=dict_row) as cur:
             cur.execute(query, (today,))
-            rows = cur.fetchall()
-
-    return rows
-
-
-def build_subject(today, rows):
-    practice_time = rows[0]["practice_time"] or ""
-    return f"【出欠確認】{today} {practice_time}"
-
-
-def split_attendance(rows):
-    attend = []
-    absent = []
-    pending = []
-
-    for row in rows:
-        name = row.get("name") or "名称未設定"
-        status = row.get("status")
-
-        line = f"・{name}"
-
-        if status == "attend":
-            attend.append(line)
-        elif status == "absent":
-            absent.append(line)
-        else:
-            pending.append(line)
-
-    return attend, absent, pending
+            return cur.fetchall()
 
 
 def build_body(today, rows):
-    practice_time = rows[0].get("practice_time") or "未設定"
+    practice_time = rows[0]["practice_time"] or "未設定"
 
-    attend, absent, pending = split_attendance(rows)
+    attend, absent, pending = [], [], []
 
-    attend_text = "\n".join(attend) if attend else "・なし"
-    absent_text = "\n".join(absent) if absent else "・なし"
-    pending_text = "\n".join(pending) if pending else "・なし"
+    for r in rows:
+        name = r["name"] or "名称未設定"
+        status = r["status"]
 
-    total_members = len(rows)
-    answered_count = len(attend) + len(absent)
+        if status == "attend":
+            attend.append(f"・{name}")
+        elif status == "absent":
+            absent.append(f"・{name}")
+        else:
+            pending.append(f"・{name}")
 
     return f"""本日（{today}）の出欠状況です。
 
 ■練習時間
 {practice_time}
 
-■回答状況
-回答済み：{answered_count} / {total_members}
-
 ■参加
-{attend_text}
+{chr(10).join(attend) or '・なし'}
 
 ■不参加
-{absent_text}
+{chr(10).join(absent) or '・なし'}
 
 ■未回答
-{pending_text}
+{chr(10).join(pending) or '・なし'}
 
 このメールは自動送信です。
 """
 
 
 def send_email(subject, body):
-    resend.api_key = get_env("RESEND_API_KEY")
-    admin_email_raw = get_env("ADMIN_EMAIL")
-    mail_from = get_env("MAIL_FROM")
+    user = get_env("GMAIL_USER")
+    password = get_env("GMAIL_PASSWORD")
 
-    # 環境変数（複数対応）
-    admin_emails = [email.strip() for email in admin_email_raw.split(",") if email.strip()]
-
-    # 固定追加（今回の要件）
-    extra_emails = [
+    # ★送信先（ここが今回の要件）
+    to_emails = [
+        "kasahararyo@gmail.com",
         "karuizawa.buffalos@gmail.com"
     ]
 
-    # 重複排除しつつ統合
-    all_emails = list(set(admin_emails + extra_emails))
+    msg = MIMEText(body)
+    msg["Subject"] = subject
+    msg["From"] = f"OB OGビジタ管理 <{user}>"
+    msg["To"] = ", ".join(to_emails)
 
-    if not all_emails:
-        raise ValueError("送信先メールが設定されていません")
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+        smtp.login(user, password)
+        smtp.send_message(msg)
 
-    print("送信先:", all_emails)
-
-    response = resend.Emails.send({
-        "from": mail_from,
-        "to": all_emails,
-        "subject": subject,
-        "text": body,
-    })
-
-    print("メール送信結果:", response)
+    print("送信成功:", to_emails)
 
 
 def main():
@@ -151,7 +111,7 @@ def main():
         print(f"{today} は練習予定がないため、メール送信しません。")
         return
 
-    subject = build_subject(today, rows)
+    subject = f"【出欠確認】{today}"
     body = build_body(today, rows)
 
     print("===== SUBJECT =====")
