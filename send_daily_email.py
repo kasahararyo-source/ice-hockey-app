@@ -54,9 +54,6 @@ def fetch_today_attendance_rows():
 
 
 def build_subject(today, rows):
-    if not rows:
-        return f"【出欠確認】{today} 本日の予定なし"
-
     practice_time = rows[0]["practice_time"] or ""
     return f"【出欠確認】{today} {practice_time}"
 
@@ -83,12 +80,6 @@ def split_attendance(rows):
 
 
 def build_body(today, rows):
-    if not rows:
-        return f"""本日（{today}）の予定は登録されていません。
-
-このメールは自動送信です。
-"""
-
     practice_time = rows[0].get("practice_time") or "未設定"
 
     attend, absent, pending = split_attendance(rows)
@@ -123,12 +114,16 @@ def build_body(today, rows):
 
 def send_email(subject, body):
     resend.api_key = get_env("RESEND_API_KEY")
-    admin_email = get_env("ADMIN_EMAIL")
+    admin_email_raw = get_env("ADMIN_EMAIL")
     mail_from = get_env("MAIL_FROM")
+
+    admin_emails = [email.strip() for email in admin_email_raw.split(",") if email.strip()]
+    if not admin_emails:
+        raise ValueError("ADMIN_EMAIL に有効なメールアドレスが設定されていません")
 
     response = resend.Emails.send({
         "from": mail_from,
-        "to": [admin_email],
+        "to": admin_emails,
         "subject": subject,
         "text": body,
     })
@@ -139,6 +134,11 @@ def send_email(subject, body):
 def main():
     today = get_today_jst()
     rows = fetch_today_attendance_rows()
+
+    if not rows:
+        print(f"{today} は練習予定がないため、メール送信しません。")
+        return
+
     subject = build_subject(today, rows)
     body = build_body(today, rows)
 
