@@ -23,7 +23,7 @@ def get_db_connection():
 
 
 def get_today_jst():
-    return datetime.now(JST).date()
+    return datetime.now(JST).strftime("%Y-%m-%d")
 
 
 def fetch_today_attendance_rows():
@@ -31,20 +31,18 @@ def fetch_today_attendance_rows():
 
     query = """
         SELECT
-            e.id AS event_id,
-            e.event_date,
-            e.title,
-            e.start_time,
-            u.name,
-            a.status,
-            a.note
-        FROM events e
+            p.id AS practice_id,
+            p.practice_date,
+            p.practice_time,
+            m.name,
+            a.status
+        FROM practices p
         LEFT JOIN attendance a
-            ON e.id = a.event_id
-        LEFT JOIN users u
-            ON a.user_id = u.id
-        WHERE e.event_date = %s
-        ORDER BY e.start_time ASC, u.name ASC
+            ON p.id = a.practice_id
+        LEFT JOIN members m
+            ON a.member_id = m.id
+        WHERE p.practice_date = %s
+        ORDER BY p.practice_time ASC, m.id ASC
     """
 
     with get_db_connection() as conn:
@@ -57,66 +55,61 @@ def fetch_today_attendance_rows():
 
 def build_subject(today, rows):
     if not rows:
-        return f"【出欠確認】{today.strftime('%Y/%m/%d')} 本日の予定なし"
+        return f"【出欠確認】{today} 本日の予定なし"
 
-    title = rows[0]["title"] or "本日の予定"
-    return f"【出欠確認】{today.strftime('%Y/%m/%d')} {title}"
+    practice_time = rows[0]["practice_time"] or ""
+    return f"【出欠確認】{today} {practice_time}"
 
 
 def split_attendance(rows):
-    joined = []
+    attend = []
     absent = []
     pending = []
 
     for row in rows:
         name = row.get("name") or "名称未設定"
-        status = row.get("status") or "未回答"
-        note = row.get("note") or ""
+        status = row.get("status")
 
         line = f"・{name}"
-        if note:
-            line += f"（{note}）"
 
-        if status == "参加":
-            joined.append(line)
-        elif status == "不参加":
+        if status == "attend":
+            attend.append(line)
+        elif status == "absent":
             absent.append(line)
         else:
             pending.append(line)
 
-    return joined, absent, pending
+    return attend, absent, pending
 
 
 def build_body(today, rows):
     if not rows:
-        return f"""本日（{today.strftime('%Y/%m/%d')}）の予定は登録されていません。
+        return f"""本日（{today}）の予定は登録されていません。
 
 このメールは自動送信です。
 """
 
-    first = rows[0]
-    title = first.get("title") or "予定"
-    start_time = first.get("start_time")
+    practice_time = rows[0].get("practice_time") or "未設定"
 
-    if start_time:
-        start_time_text = start_time.strftime("%H:%M")
-    else:
-        start_time_text = "未設定"
+    attend, absent, pending = split_attendance(rows)
 
-    joined, absent, pending = split_attendance(rows)
-
-    joined_text = "\n".join(joined) if joined else "・なし"
+    attend_text = "\n".join(attend) if attend else "・なし"
     absent_text = "\n".join(absent) if absent else "・なし"
     pending_text = "\n".join(pending) if pending else "・なし"
 
-    return f"""本日（{today.strftime('%Y/%m/%d')}）の出欠状況です。
+    total_members = len(rows)
+    answered_count = len(attend) + len(absent)
 
-■予定
-{title}
-開始時刻：{start_time_text}
+    return f"""本日（{today}）の出欠状況です。
+
+■練習時間
+{practice_time}
+
+■回答状況
+回答済み：{answered_count} / {total_members}
 
 ■参加
-{joined_text}
+{attend_text}
 
 ■不参加
 {absent_text}
