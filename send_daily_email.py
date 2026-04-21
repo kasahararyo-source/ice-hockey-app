@@ -117,13 +117,25 @@ def send_email(subject, body):
     admin_email_raw = get_env("ADMIN_EMAIL")
     mail_from = get_env("MAIL_FROM")
 
+    # 環境変数（複数対応）
     admin_emails = [email.strip() for email in admin_email_raw.split(",") if email.strip()]
-    if not admin_emails:
-        raise ValueError("ADMIN_EMAIL に有効なメールアドレスが設定されていません")
+
+    # 固定追加（今回の要件）
+    extra_emails = [
+        "karuizawa.buffalos@gmail.com"
+    ]
+
+    # 重複排除しつつ統合
+    all_emails = list(set(admin_emails + extra_emails))
+
+    if not all_emails:
+        raise ValueError("送信先メールが設定されていません")
+
+    print("送信先:", all_emails)
 
     response = resend.Emails.send({
         "from": mail_from,
-        "to": admin_emails,
+        "to": all_emails,
         "subject": subject,
         "text": body,
     })
